@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>KNN LAB ULTIMATE · Studio</title>
+<style>
+
+:root{
+  color-scheme:dark;
+  --bg:#060606;
+  --bg-elev:#0b0b0b;
+  --panel:#101010;
+  --panel2:#151515;
+  --line:#2a2a2a;
+  --line-soft:#1d1d1d;
+  --text:#f6f0ea;
+  --muted:#a69381;
+  --a:#ff7a18;
+  --b:#ffd08d;
+  --accent:#ff8b1f;
+  --accent-2:#ffb04c;
+  --accent-soft:rgba(255,139,31,.14);
+  --glow:rgba(255,122,24,.32);
+  --success:#ffb04c;
+  --gold:#ffc46b;
+  --shadow:0 18px 60px rgba(0,0,0,.38);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  font:15px/1.6 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  color:var(--text);
+  background:
+    radial-gradient(circle at 12% 0%, rgba(255,122,24,.18), transparent 28%),
+    radial-gradient(circle at 100% 15%, rgba(255,122,24,.09), transparent 30%),
+    linear-gradient(180deg,#090909 0%, #050505 100%);
+  min-height:100vh;
+}
+button,input,select{font:inherit}
+button{
+  cursor:pointer;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:10px 14px;
+  background:linear-gradient(180deg,#151515,#101010);
+  color:var(--text);
+  transition:transform .18s ease,border-color .18s ease,background .18s ease,box-shadow .18s ease,opacity .18s ease;
+  box-shadow:0 0 0 rgba(0,0,0,0);
+}
+button:hover{border-color:#6f4420;background:linear-gradient(180deg,#1c1c1c,#121212);transform:translateY(-1px);box-shadow:0 10px 24px rgba(0,0,0,.2)}
+button:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+.primary{
+  background:linear-gradient(135deg,var(--accent),#ff6a00);
+  color:#120900;
+  border-color:transparent;
+  font-weight:800;
+  box-shadow:0 0 0 1px rgba(255,255,255,.03) inset,0 0 25px rgba(255,122,24,.25);
+}
+.primary:hover{filter:brightness(1.06);box-shadow:0 0 0 1px rgba(255,255,255,.06) inset,0 0 28px rgba(255,122,24,.35)}
+.shell{max-width:1520px;margin:auto;padding:32px 24px 58px}
+.top{
+  display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap;
+  padding:22px 24px;
+  margin-bottom:22px;
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:24px;
+  background:linear-gradient(180deg,rgba(20,20,20,.92),rgba(11,11,11,.92));
+  box-shadow:var(--shadow), inset 0 1px 0 rgba(255,255,255,.03);
+  backdrop-filter: blur(10px);
+}
+.brand{display:flex;align-items:center;gap:16px}
+.logo{
+  width:56px;height:56px;display:grid;place-items:center;
+  font-size:23px;font-weight:900;letter-spacing:.08em;
+  color:#170b00;
+  background:linear-gradient(135deg,#ff9a38,#ff6a00);
+  border-radius:18px;
+  box-shadow:0 0 28px rgba(255,122,24,.28);
+}
+.eyebrow{color:var(--accent-2);font-size:11px;font-weight:800;letter-spacing:.22em;text-transform:uppercase}
+h1{font-size:31px;line-height:1.02;margin:4px 0 6px;letter-spacing:-.03em}
+h2{font-size:19px;letter-spacing:-.02em;margin:0 0 12px}
+h3{font-size:15px;letter-spacing:-.01em;margin:0 0 10px}
+.sub{color:var(--muted);font-size:13px}
+nav{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 24px}
+nav button{
+  background:rgba(18,18,18,.8);
+  border-radius:999px;
+  padding:10px 14px;
+}
+nav button.active{
+  background:linear-gradient(135deg,rgba(255,139,31,.18),rgba(255,139,31,.1));
+  border-color:rgba(255,139,31,.55);
+  color:#fff4ea;
+  box-shadow:0 0 0 1px rgba(255,139,31,.1) inset, 0 0 18px rgba(255,122,24,.12);
+}
+.layout{display:grid;grid-template-columns:minmax(420px,1.45fr) minmax(320px,1fr);gap:18px}
+.stack{display:grid;gap:18px;align-content:start}
+.card{
+  position:relative;
+  background:linear-gradient(180deg,rgba(17,17,17,.98),rgba(11,11,11,.98));
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:22px;
+  padding:20px;
+  box-shadow:var(--shadow), inset 0 1px 0 rgba(255,255,255,.02);
+  overflow:hidden;
+}
+.card::before{
+  content:"";position:absolute;inset:0 auto auto 0;height:1px;width:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,139,31,.35),transparent);
+  pointer-events:none;
+}
+.head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.pill{
+  display:inline-flex;align-items:center;gap:6px;
+  border:1px solid rgba(255,139,31,.24);
+  padding:5px 10px;border-radius:999px;
+  color:#ffd7b0;font-size:12px;
+  background:rgba(255,139,31,.08);
+}
+.canvasbox{
+  position:relative;margin-top:14px;
+  background:linear-gradient(180deg,#0a0a0a,#111111);
+  border:1px solid #242424;
+  border-radius:18px;overflow:hidden;aspect-ratio:1.55;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.02);
+}
+canvas{width:100%;height:100%;display:block;touch-action:none;cursor:crosshair}
+.legend{display:flex;gap:17px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:12px}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;background:var(--a);box-shadow:0 0 12px rgba(255,122,24,.3)}
+.controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:15px 0}
+.field{display:grid;gap:6px;color:#d9c5b2;font-size:12px}
+.field select,.field input[type=number]{width:100%;background:#0e0e0e;color:var(--text);padding:10px 11px;border:1px solid #2f2f2f;border-radius:12px}
+.field input[type=range]{width:100%;accent-color:var(--accent)}
+.actions{display:flex;flex-wrap:wrap;gap:9px}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.metric{
+  border:1px solid #252525;border-radius:16px;padding:13px;background:linear-gradient(180deg,#121212,#0e0e0e);
+}
+.metric strong{display:block;font-size:24px;font-variant-numeric:tabular-nums;letter-spacing:-.03em}
+.metric small{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em}
+.info{
+  padding:13px 14px;border-radius:14px;border:1px solid rgba(255,139,31,.18);
+  background:linear-gradient(180deg,rgba(255,139,31,.08),rgba(255,139,31,.04));
+  color:#f1d2af;font-size:13px;
+}
+.progress{height:7px;background:#202020;border-radius:30px;overflow:hidden}
+.progress>div{height:100%;background:linear-gradient(90deg,#ff6a00,var(--accent-2));width:0;transition:width .35s;box-shadow:0 0 18px rgba(255,122,24,.25)}
+.steps{display:grid;gap:8px;margin:12px 0}
+.step{padding:10px 12px;border:1px solid #232323;border-radius:12px;color:var(--muted);font-size:13px;background:#101010}
+.step.on{border-color:rgba(255,139,31,.5);background:rgba(255,139,31,.10);color:white}
+.step.done{border-color:rgba(255,176,76,.45);color:#ffe3bf;background:rgba(255,176,76,.07)}
+.barrow{display:grid;grid-template-columns:82px 1fr 35px;gap:8px;align-items:center;font-size:12px}
+.track{height:11px;border-radius:20px;background:#202020;overflow:hidden}
+.fill{height:100%;transition:width .25s;background:linear-gradient(90deg,var(--accent),var(--accent-2))}
+.hidden{display:none!important}
+.wide{grid-column:1/-1}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.lesson{background:linear-gradient(180deg,#131313,#0e0e0e);border-radius:18px;border:1px solid #252525;padding:16px}
+.lesson p{margin:8px 0;color:#ddd1c6}
+.muted{color:var(--muted)}
+.score{font-size:42px;font-weight:900;color:var(--accent-2);text-shadow:0 0 18px rgba(255,176,76,.15)}
+.tablewrap{overflow:auto;max-height:290px;border-radius:14px;border:1px solid #222;background:#0d0d0d}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid #202020}
+th{color:#ffd2a4;position:sticky;top:0;background:#141414}
+.message{min-height:27px;font-size:13px;color:#f5c58d}
+.glow{color:var(--accent-2);text-shadow:0 0 14px rgba(255,176,76,.14)}
+.footer{margin-top:25px;text-align:center;font-size:12px;color:var(--muted)}
+.present .shell{max-width:1760px}
+.present .layout{grid-template-columns:minmax(600px,1.6fr) minmax(350px,1fr)}
+.present .canvasbox{aspect-ratio:1.85}
+.present .card{font-size:17px}
+.present nav{display:none}
+.present h1{font-size:36px}
+.present .sub{font-size:15px}
+.file{width:100%;color:#d8eaff}
+kbd{padding:2px 6px;border:1px solid #4d3a28;border-radius:6px;background:#17110d;color:#ffd8b0}
+pre{white-space:pre-wrap;font-size:12px;color:#ffca90}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.present .layout{grid-template-columns:1fr}.grid3{grid-template-columns:1fr}}
+@media(max-width:500px){.shell{padding:16px 11px}.top{padding:18px}.controls{grid-template-columns:1fr}.metrics{gap:5px}.metric{padding:8px}.metric strong{font-size:19px}.canvasbox{aspect-ratio:1.14}}
+.livechart{margin-top:20px;padding:14px;border:1px solid #252525;border-radius:18px;background:linear-gradient(180deg,#0f0f0f,#0b0b0b)}
+.livechart canvas{width:100%;height:185px;display:block}
+.casehero{
+  padding:22px;margin-bottom:18px;border:1px solid rgba(255,139,31,.18);border-radius:22px;
+  background:radial-gradient(circle at 100% 0%, rgba(255,122,24,.14), transparent 35%), linear-gradient(180deg,#151515,#101010);
+}
+.casehero h2{font-size:26px;margin:4px 0 8px;letter-spacing:-.03em}
+.casehero p{max-width:790px;color:#ddd1c6}
+.realresult{padding:16px;border-radius:16px;border:1px solid #2b2b2b;background:#0d0d0d;margin:14px 0;font-size:17px}
+.realresult b{color:var(--accent-2)}
+.classStatsValue{font-weight:750}
+.miniStat{font-variant-numeric:tabular-nums}
+#classMetrics td,#classMetrics th{white-space:nowrap}
+@media(max-width:720px){.casehero{padding:14px}}
+
+
+/* KNN ULTIMATE · Neon Orange UI polish */
+:root{--accent:#ff831b;--accent-2:#ffa544;--text:#f8f6f3;--muted:#b4aaa2;--line:#303030;--panel:#111;--panel2:#191919}
+body{background:radial-gradient(ellipse at 70% -25%,rgba(255,111,0,.13),transparent 56%),#070707}
+.shell{max-width:1580px}
+.top{border:1px solid #29221c;background:linear-gradient(120deg,#161310,#0c0c0c);border-radius:22px;padding:23px 26px}
+.card{background:linear-gradient(155deg,#151515,#0d0d0d);border-color:#2a2927}
+button{min-height:42px}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #ffae54;outline-offset:3px}
+.primary,.primary:hover,.primary:focus-visible{color:#160a00!important;-webkit-text-fill-color:#160a00!important;text-shadow:none!important}
+.primary{background:linear-gradient(110deg,#ffac48,#ff7915);font-weight:800;border-color:#ff9a30;box-shadow:0 4px 20px #ff7a1826}
+.primary:hover{background:linear-gradient(110deg,#ffc37e,#ff9b3d)!important;color:#110900!important;border-color:#ffd29b!important;box-shadow:0 6px 25px #ff801b55!important}
+.actions button{font-weight:650}nav button.active{background:#2b1c10;border-color:#fb8a30}
+.canvasbox{border-color:#34302d}.metric{border-color:#322d28;background:#171514}.metric strong{overflow-wrap:anywhere}
+.controls .field select,.controls .field input[type=number]{min-height:45px}
+.k-panel{display:flex;flex-direction:column;justify-content:center;gap:8px;min-width:0;grid-column:span 1;padding:12px 14px 10px;border:1px solid #54351c;background:linear-gradient(130deg,#21170f,#141210);border-radius:16px}
+.k-head,.k-scale,.k-drag{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.k-head span{font-size:10px;font-weight:800;letter-spacing:1.2px;color:#ccae91}.k-head strong{font-size:20px;color:#ffad53;white-space:nowrap}.k-head strong span{font-size:inherit;color:inherit;letter-spacing:0}
+.k-drag input[type=range]{flex:1;min-width:0;appearance:none;-webkit-appearance:none;height:7px;border-radius:99px;background:linear-gradient(90deg,#ff8215 var(--k-fill,28.6%),#3b3029 var(--k-fill,28.6%));cursor:grab;touch-action:pan-y}
+.k-drag input[type=range]:active{cursor:grabbing}.k-drag input[type=range]::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:25px;height:25px;border-radius:50%;background:#fff7ed;border:5px solid #ff881b;box-shadow:0 0 0 4px #ff821529,0 0 18px #ff821b50;cursor:grab}
+.k-drag input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff7ed;border:5px solid #ff881b;box-shadow:0 0 0 4px #ff821529;cursor:grab}
+.k-adjust{font-size:20px;width:35px;height:35px;min-height:35px;display:grid;place-items:center;padding:0;border-color:#604022;background:#2b1d12;color:#ffb56b}
+.k-adjust:hover{background:#46301b;color:white;border-color:#ff8c28}
+.k-scale{font-size:10px;color:#b69c85}.k-scale span:nth-child(2){text-transform:uppercase;letter-spacing:.7px}
+.dashboard-hero{display:flex;align-items:center;gap:22px;padding:18px 14px;margin:10px 0 16px;border:1px solid #34291f;border-radius:18px;background:radial-gradient(circle at 15% 50%,#ff831b15,transparent 65%),#121110}
+.accuracy-dial{width:140px;height:140px;flex:0 0 140px;border-radius:50%;background:conic-gradient(#ff9b32 var(--acc,0%),#33261c 0);display:grid;place-items:center;box-shadow:0 0 32px #ff831b12}
+.accuracy-center{width:112px;height:112px;border-radius:50%;background:#151311;display:flex;align-items:center;justify-content:center;flex-direction:column;border:1px solid #49331e}
+.accuracy-center small{font-size:10px;letter-spacing:1.1px;color:#e0b991}.accuracy-center strong{font-size:28px;font-variant-numeric:tabular-nums;letter-spacing:-1px}
+.dashboard-copy{min-width:0}.dashboard-copy h3{font-size:19px;margin:5px 0}.dashboard-copy p{font-size:12px;color:#c7b5a4;line-height:1.5;margin:0 0 9px}.dash-meta{font-size:13px;color:#ffd4a3}.dash-meta #correctCount{font-weight:800;font-size:17px}
+.dashboard-metrics{margin:0 0 16px}.dashboard-metrics .metric strong{color:#ffbf7b}
+.livechart{background:#111;border:1px solid #322b25;border-radius:18px;padding:18px}.livechart canvas{height:205px}
+#classMetrics th,#confusion th{background:#1c1815;color:#ffd3a6}#classMetrics td,#confusion td{background:#131210}
+#classMetrics tbody tr:hover td,#confusion tbody tr:hover td{background:#292018}
+.info{border-color:#49321e;background:#22180f;color:#ffe1be}
+@media(max-width:600px){.dashboard-hero{gap:12px;padding:12px}.accuracy-dial{width:106px;height:106px;flex-basis:106px}.accuracy-center{width:84px;height:84px}.accuracy-center strong{font-size:20px}.accuracy-center small{font-size:8px}.dashboard-copy h3{font-size:16px}.k-panel{grid-column:1/-1}}
+
+
+.live-query-metrics{margin-top:12px}
+.live-vote-bars{margin:14px 0 8px;display:grid;gap:10px}
+.live-vote-row{display:grid;grid-template-columns:minmax(80px,1fr) 1.9fr 90px;align-items:center;gap:12px;font-size:12px}
+.live-vote-row span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#efd4ba}
+.live-vote-row b{text-align:right;font-variant-numeric:tabular-nums;color:#ffcc91}
+.live-vote-track{height:10px;background:#252019;border-radius:999px;overflow:hidden}
+.live-vote-track>div{height:100%;border-radius:999px;transition:width .18s ease}
+#kInsight{border-left:2px solid #ff8b1f;padding-left:12px;margin-top:15px}
+@media(max-width:540px){.live-vote-row{grid-template-columns:75px 1fr 65px;gap:7px}.live-query-metrics .metric strong{font-size:17px}}
+
+/* V6: compact editorial grid, fewer empty spaces */
+.shell{max-width:1420px;padding:19px 22px 30px}.top{padding:16px 20px;margin-bottom:14px;border-radius:18px}.logo{width:46px;height:46px;border-radius:12px}h1{font-size:27px}nav{margin-bottom:14px}nav button{padding:8px 13px}.card{padding:17px;border-radius:17px}.stack{gap:13px}.layout{gap:13px}.canvasbox{aspect-ratio:1.85}.controls{gap:10px;margin:11px 0}.metric{padding:11px}.livechart{margin-top:12px}.steps{gap:5px}.step{padding:7px 10px}.football-intro{display:flex;justify-content:space-between;align-items:center;gap:16px;border:1px solid #3b2614;border-radius:18px;padding:20px 24px;margin-bottom:13px;background:radial-gradient(circle at 95% 30%,#ff7a181e,transparent 30%),#12100e}.football-intro h2{font-size:29px;margin:2px 0 6px}.football-intro p{max-width:830px;color:#c5b7a9;margin:0;font-size:13px}.pitch-icon{font-size:62px;line-height:1}.football-grid{display:grid;grid-template-columns:1.16fr 1fr;gap:13px;align-items:start}.football-card,.football-side{height:100%}.player-roles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:12px 0}.role{background:#171411;border:1px solid #382a1c;border-radius:13px;padding:12px 9px;display:flex;flex-direction:column;align-items:flex-start;gap:3px}.role-sign{display:grid;place-items:center;background:#ff8418;color:#140a00;border-radius:9px;width:33px;height:34px;font-weight:900}.role b{font-size:13px}.role small{color:var(--muted);font-size:11px}.football-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}.football-submit{width:100%;margin-top:12px;padding:13px}.preset-actions button{font-size:12px;padding:8px 10px}.method-card{background:#171310;border:1px solid #30251c;border-radius:13px;padding:14px;margin-top:16px}.method-card h3{color:#ffb04c}.method-card p{color:#c9bbab;font-size:13px;margin:5px 0}.method-step{display:flex;align-items:start;gap:12px;padding:8px 0;border-top:1px solid #2c241d}.method-step span{color:#ffb04c;font-weight:800;font-size:12px}.realresult{margin:12px 0 0}.football-result-top{display:flex;flex-direction:column;gap:4px}.football-result-top strong{font-size:25px;color:#ffb04c}.football-result-top>span:last-child{font-size:12px;color:var(--muted)}.football-result-votes{display:grid;gap:7px;margin:13px 0}.football-vote{display:grid;grid-template-columns:110px 1fr 16px;gap:7px;align-items:center;font-size:12px}.football-vote>div{height:8px;background:#28211b;overflow:hidden;border-radius:10px}.football-vote i{display:block;height:100%;background:linear-gradient(90deg,#ed6700,#ffc174);border-radius:10px}.football-csv,.football-guide{height:100%}
+#lab{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:13px;align-items:start}
+#lab .layout,#lab .stack{display:contents}
+#lab .map-card{grid-column:1;grid-row:1 / span 2}
+#lab .result-card{grid-column:2;grid-row:1}
+#lab .steps-card{grid-column:2;grid-row:2}
+#lab .stats-card{grid-column:1 / -1;grid-row:3}
+#lab .neighbors-card{grid-column:1 / -1;grid-row:4}
+#lab .stats-card .dashboard-hero{max-width:800px}
+#lab .stats-card .dashboard-metrics{max-width:900px}
+#lab .stats-card .livechart canvas{height:205px}
+#lab .stats-card .livechart{max-width:100%}
+@media(max-width:900px){#lab{display:flex;flex-direction:column}#lab .card{width:100%}.football-grid{grid-template-columns:1fr}}
+@media(max-width:560px){.shell{padding:11px}.football-intro{padding:14px}.football-intro h2{font-size:23px}.pitch-icon{display:none}.player-roles{gap:5px}.role{padding:8px 5px}.role b{font-size:11px}.football-fields{grid-template-columns:1fr}}
+</style></head><body><div class="shell">
+<header class="top"><div class="brand"><div class="logo">K</div><div><div class="eyebrow">Machine Learning · Interactive Studio</div><h1>KNN LAB <span class="glow">ULTIMATE</span></h1><div class="sub">Una experiencia visual y profesional para entender, evaluar y presentar el algoritmo KNN.</div></div></div><button id="presentBtn">Modo presentación</button></header>
+<nav id="tabs"><button class="active" data-tab="lab">Laboratorio</button><button data-tab="learn">Fundamentos</button><button data-tab="challenge">Desafío</button><button data-tab="data">Fútbol y CSV</button><button data-tab="about">Aplicaciones</button></nav>
+<section id="lab" class="tab"><div class="layout"><div class="stack"><article class="card map-card"><div class="head"><div><h2>Mapa de clasificación</h2><div class="sub" id="mapDescription">Haz clic en el gráfico para colocar el punto que quieras clasificar.</div></div><span class="pill" id="datasetPill">Datos sintéticos</span></div><div class="canvasbox"><canvas id="plot" aria-label="Plano de clasificación KNN interactivo"></canvas></div><div class="legend"><span><i class="dot"></i> Equipo A</span><span><i class="dot" style="background:var(--b)"></i> Equipo B</span><span><i class="dot" style="background:#ffcf74"></i> Punto desconocido</span><span>◎ Vecinos seleccionados</span></div><div class="controls"><div class="k-panel"><div class="k-head"><span>NÚMERO DE VECINOS</span><strong>K = <span id="kLabel">5</span></strong></div><div class="k-drag"><button id="kMinus" class="k-adjust" type="button" aria-label="Disminuir K">−</button><input aria-label="Desliza para cambiar el valor de K" id="k" type="range" min="1" max="15" value="5"><button id="kPlus" class="k-adjust" type="button" aria-label="Aumentar K">+</button></div><div class="k-scale"><span>1</span><span>Arrastra para comparar</span><span id="kMax">15</span></div></div><label class="field">Distancia<select id="distance"><option value="euclidean">Euclídea · √(Δx² + Δy²)</option><option value="manhattan">Manhattan · |Δx| + |Δy|</option></select></label><label class="field">Interacción con el gráfico<select id="mode"><option value="query">Mover punto desconocido</option><option value="blue">Añadir puntos azules</option><option value="pink">Añadir puntos rosas</option><option value="erase">Borrar puntos cercanos</option></select></label><label class="field">Visualización<select id="regions"><option value="on">Regiones de decisión</option><option value="off">Ocultar regiones</option></select></label></div><div class="actions"><button class="primary" id="animate">Explicar paso a paso</button><button id="random">Nuevos puntos</button><button id="reset">Restablecer</button><button id="clear">Vaciar mapa</button></div></article><article class="card steps-card"><div class="head"><h2>Proceso de decisión</h2><span class="pill" id="stepCount">En directo</span></div><div class="progress"><div id="stepProgress"></div></div><div id="steps" class="steps"></div><div class="actions"><button id="prevStep">← Anterior</button><button id="nextStep">Siguiente →</button><button id="playSteps" class="primary">Reproducir</button></div><p class="info" id="explanation">KNN compara el punto desconocido con todos los puntos conocidos y utiliza los K más cercanos para votar.</p></article></div>
+<div class="stack"><article class="card result-card"><h2>Resultado en directo</h2><div class="metrics"><div class="metric"><small>Predicción</small><strong id="prediction">—</strong></div><div class="metric"><small>Votos mayoría</small><strong id="votes">—</strong></div><div class="metric"><small>Confianza de voto*</small><strong id="confidence">—</strong></div></div><p class="sub">* Es la proporción de votos, no una probabilidad calibrada de acierto.</p><div id="voteBars" class="stack" style="margin-top:12px"></div></article><article class="card stats-card"><h2>Dashboard de estadísticas</h2><p class="sub">Evaluación independiente: división estratificada 70 % entrenamiento / 30 % prueba, con semilla fija. Los datos del test no votan.</p><div class="dashboard-hero"><div class="accuracy-dial" id="accuracyDial"><div class="accuracy-center"><small>ACCURACY</small><strong id="accuracy">—</strong></div></div><div class="dashboard-copy"><span class="eyebrow">RENDIMIENTO DEL MODELO</span><h3 id="performanceStatus">Analizando predicciones</h3><p id="performanceDetail">La evaluación utiliza datos independientes del entrenamiento.</p><div class="dash-meta"><span id="correctCount">—</span> aciertos en el test</div></div></div><div class="metrics dashboard-metrics"><div class="metric"><small>Vecinos K</small><strong id="dashboardK">5</strong></div><div class="metric"><small>Test</small><strong id="testCount">—</strong></div><div class="metric"><small>Tiempo aprox.</small><strong id="elapsed">—</strong></div></div><h3 style="margin-top:20px">Impacto de K en tu punto</h3><p class="sub">Estas métricas se recalculan con cada movimiento del deslizador y al arrastrar el punto desconocido.</p><div class="metrics dashboard-metrics live-query-metrics"><div class="metric"><small>Vecinos considerados</small><strong id="liveK">—</strong></div><div class="metric"><small>Distancia media</small><strong id="liveAvgDistance">—</strong></div><div class="metric"><small>Voto ganador</small><strong id="liveVote">—</strong></div></div><div id="liveClassVotes" class="live-vote-bars"></div><p class="sub" id="kInsight" aria-live="polite"></p><div class="livechart"><div class="head"><h3>Rendimiento según K</h3><span class="pill">Test independiente</span></div><canvas id="kChart" aria-label="Gráfica de precisión frente al número de vecinos"></canvas><p class="sub">Cada punto representa la precisión de ese K en el mismo test. La línea vertical marca tu K actual. Elegir el mejor K mirando repetidamente el test sesgaría la evaluación: para optimizar K haría falta validación adicional.</p></div><h3>Resultados por clase</h3><div class="tablewrap" id="classMetrics"></div><p class="sub">Precisión: de las predicciones de una clase, cuántas fueron correctas. Recall: de los ejemplos reales de esa clase, cuántos detectó. F1: equilibrio entre ambas.</p><h3 style="margin-top:18px">Matriz de confusión <span class="sub">· filas reales / columnas predichas</span></h3><div class="tablewrap" id="confusion"></div><div class="info" id="evalNote">Esta métrica se calcula sobre puntos que no se utilizan como vecinos.</div></article><article class="card neighbors-card"><h2>Vecinos y distancias</h2><div class="tablewrap"><table><thead><tr><th>#</th><th>Clase</th><th>Distancia</th><th>Coordenadas</th></tr></thead><tbody id="neighbors"></tbody></table></div></article></div></div></section>
+<section id="learn" class="tab hidden"><div class="card"><h2>KNN explicado sin complicaciones</h2><div class="grid3"><div class="lesson"><h3>01 · Datos etiquetados</h3><p>Disponemos de ejemplos previos, cada uno con unas características (x, y) y una clase conocida.</p></div><div class="lesson"><h3>02 · Calcular distancias</h3><p>Para un ejemplo nuevo, calculamos lo cerca que está de todos los ejemplos de entrenamiento.</p></div><div class="lesson"><h3>03 · Elegir K</h3><p>Ordenamos por distancia y nos quedamos con los K puntos más cercanos.</p></div><div class="lesson"><h3>04 · Votación</h3><p>La clase más repetida entre los vecinos será la predicción. En un empate se usa un criterio fijo.</p></div><div class="lesson"><h3>05 · Validar</h3><p>Evaluamos sobre datos que no participaron en la búsqueda de vecinos. La precisión no debe medirse usando los mismos ejemplos.</p></div><div class="lesson"><h3>06 · Ajustar</h3><p>K pequeño puede reaccionar al ruido; K grande puede borrar fronteras entre clases. La escala de cada variable importa.</p></div></div><h2 style="margin-top:20px">🧮 Fórmulas importantes</h2><div class="grid3"><div class="lesson"><b>Euclídea</b><p>d(A,B) = √[(x₂−x₁)² + (y₂−y₁)²]</p><div class="sub">Distancia en línea recta.</div></div><div class="lesson"><b>Manhattan</b><p>d(A,B) = |x₂−x₁| + |y₂−y₁|</p><div class="sub">Distancia por movimientos horizontales y verticales.</div></div><div class="lesson"><b>Accuracy</b><p>Predicciones correctas / Total del test</p><div class="sub">Sirve como resumen, pero puede engañar si las clases están desequilibradas.</div></div></div><p class="info" style="margin-top:16px">KNN es un algoritmo supervisado y basado en instancias: conserva los ejemplos y calcula vecinos al predecir. En este laboratorio se normalizan las variables al rango 0–1 antes de comparar distancias.</p><button class="primary" data-go="lab">Probarlo en el laboratorio →</button></div></section>
+<section id="challenge" class="tab hidden"><div class="layout"><div class="stack"><article class="card"><h2>Desafío: piensa como KNN</h2><p class="sub">Mira el gráfico, valora los vecinos cercanos y predice la clasificación. La respuesta está oculta hasta que elijas.</p><div class="canvasbox"><canvas id="challengePlot" aria-label="Gráfico del desafío"></canvas></div><div class="actions" style="margin-top:15px"><button id="guessBlue">Será azul</button><button id="guessPink">Será rosa</button><button id="newChallenge">↻ Nuevo reto</button></div><p id="challengeMessage" class="message" aria-live="polite">¿Qué clase ganará la votación?</p></article></div><div class="stack"><article class="card"><h2>Marcador</h2><div class="metrics"><div class="metric"><small>Aciertos</small><strong id="challengeHits">0</strong></div><div class="metric"><small>Intentos</small><strong id="challengeAttempts">0</strong></div><div class="metric"><small>Racha</small><strong id="challengeStreak">0</strong></div></div><p class="info" style="margin-top:15px">Aquí no gana quien adivine «la clase verdadera», sino quien deduzca correctamente lo que decidiría el algoritmo KNN.</p><p class="sub">En cada reto se generan puntos nuevos y se usa K=5 con distancia euclídea.</p></article></div></div></section>
+<section id="data" class="tab hidden"><div class="football-intro"><div><div class="eyebrow">FOOTBALL ANALYTICS / CASO REALISTA</div><h2>¿En qué posición encaja este jugador?</h2><p>Una herramienta de scouting que clasifica perfiles de fútbol según sus números. Prueba estadísticas, cambia K y descubre qué jugadores se parecen más. <strong>150 perfiles sintéticos</strong> para demostrar la técnica: no son datos oficiales ni determinan la posición ideal de un futbolista.</p></div><div class="pitch-icon" aria-hidden="true">⚽</div></div><div class="football-grid"><article class="card football-card"><div class="head"><h2>Scouting interactivo</h2><span class="pill">KNN · CLASIFICACIÓN</span></div><div class="player-roles"><div class="role"><span class="role-sign">09</span><b>Delantero</b><small>Goleador</small></div><div class="role"><span class="role-sign">08</span><b>Centrocampista</b><small>Creación</small></div><div class="role"><span class="role-sign">04</span><b>Defensa</b><small>Recuperación</small></div></div><p class="sub">Introduce los datos aproximados de una temporada y descubre su perfil:</p><div class="football-fields"><label class="field">Goles por temporada<input id="realLength" type="number" min="0" max="45" step="1" value="22"></label><label class="field">Asistencias por temporada<input id="realWidth" type="number" min="0" max="30" step="1" value="7"></label></div><div class="actions preset-actions"><button id="exampleSetosa">Delantero ejemplo</button><button id="exampleVersicolor">Centrocampista ejemplo</button><button id="exampleVirginica">Defensa ejemplo</button></div><button class="primary football-submit" id="classifyReal">Analizar futbolista →</button><div class="realresult" id="realResult" aria-live="polite">Introduce estadísticas y pulsa «Analizar futbolista» para ver el resultado y los vecinos.</div></article><article class="card football-side"><div class="head"><h2>Datos y visualización</h2><span class="pill">150 registros</span></div><p class="sub">Elige dos estadísticas para representar los jugadores en el mapa. Después puedes mover el punto y cambiar el valor de K para ver cómo cambia la predicción.</p><div class="football-fields"><label class="field">Eje horizontal<select id="irisX"><option value="0" selected>Goles</option><option value="1">Asistencias</option><option value="2">Recuperaciones</option><option value="3">Pases clave</option></select></label><label class="field">Eje vertical<select id="irisY"><option value="0">Goles</option><option value="1" selected>Asistencias</option><option value="2">Recuperaciones</option><option value="3">Pases clave</option></select></label></div><div class="actions"><button class="primary" id="loadIris">Ver 150 jugadores en el mapa →</button><button id="restoreSynthetic">Volver al ejemplo inicial</button></div><div class="method-card"><h3>¿Cómo decide KNN?</h3><div class="method-step"><span>01</span><p>Compara los goles y asistencias del nuevo jugador con los perfiles guardados.</p></div><div class="method-step"><span>02</span><p>Calcula las distancias y escoge los <strong>K vecinos más cercanos</strong>.</p></div><div class="method-step"><span>03</span><p>Cuenta cuántos delanteros, medios y defensas hay entre esos vecinos.</p></div></div><p class="sub">Importante: el ejemplo de clasificación utiliza solo goles y asistencias; las otras columnas sirven para probar distintas visualizaciones en el laboratorio.</p></article><article class="card football-csv"><h2>Tu propio dataset CSV</h2><p class="sub">Sube un CSV con dos características numéricas y una clase. El fichero se procesa en tu navegador, sin enviarlo a ningún servidor.</p><input class="file" id="csv" type="file" accept=".csv,text/csv"><div id="csvFields" class="controls hidden"><label class="field">Columna X<select id="csvX"></select></label><label class="field">Columna Y<select id="csvY"></select></label><label class="field">Etiqueta / clase<select id="csvLabel"></select></label></div><div class="actions"><button id="loadCSV" class="primary" disabled>Analizar CSV</button><button id="sampleCSV">Descargar CSV de ejemplo</button></div><p class="message" id="csvMessage" aria-live="polite"></p></article><article class="card football-guide"><h2>Cómo interpretar el resultado</h2><p>El porcentaje de votos indica cuántos vecinos apoyan una clase, <strong>no</strong> la probabilidad de que ese jugador deba ocupar esa posición.</p><div class="method-card"><h3>Normalizar importa</h3><p>Los goles, las recuperaciones y los pases clave pueden tener escalas distintas. Para que una variable no domine la distancia únicamente por sus unidades, normalizamos los datos.</p></div><div class="info">Puedes cambiar K en la pestaña Laboratorio. La accuracy se calcula utilizando un conjunto de prueba independiente.</div></article></div></section>
+<section id="about" class="tab hidden"><div class="card"><h2>Aplicaciones reales de KNN</h2><div class="grid3"><div class="lesson"><h3>🎬 Recomendaciones</h3><p>Encontrar usuarios parecidos en preferencias y sugerir contenido. En sistemas reales se suelen emplear técnicas adicionales.</p></div><div class="lesson"><h3>⚽ Analítica futbolística</h3><p>Comparar estadísticas de futbolistas con perfiles previamente clasificados.</p></div><div class="lesson"><h3>🔎 Detección de anomalías</h3><p>Las distancias a vecinos pueden ayudar a identificar registros muy distintos del resto.</p></div></div><h2 style="margin-top:20px">Ventajas y limitaciones</h2><div class="grid3"><div class="lesson"><h3 class="glow">✓ Ventajas</h3><p>Intuitivo, fácil de implementar y flexible ante fronteras no lineales.</p></div><div class="lesson"><h3>⚠ Limitaciones</h3><p>Puede ser lento con muchos datos y sensible al ruido, la escala y la dimensionalidad.</p></div><div class="lesson"><h3>✅ Buenas prácticas</h3><p>Normalizar, reservar un test independiente, elegir K con validación y evitar entrenar con información del test.</p></div></div></div></section>
+<footer class="footer">KNN LAB ULTIMATE · Funciona 100 % sin conexión · HTML + CSS + JavaScript · <kbd>Esc</kbd> sale de presentación</footer></div>
+<script>
+'use strict';
+const $=id=>document.getElementById(id), clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const colors=['#4fa8ff','#ff709c','#9fe1a3','#f7bc75','#b39aff','#65ded0','#f5a7ee','#d0e27a'];
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+let points=[], query={x:.53,y:.48}, k=5,metric='euclidean',currentType='synthetic',sourceRows=null,step=0,playing=false,renderRequest=0,train=[],test=[],classes=[],bounds=null,evalResult=null;
+let challenge={points:[],query:{x:.5,y:.5},answered:false,hits:0,attempts:0,streak:0};
+let irisRaw=[];
+const seeded=(seed)=>()=>{seed=(Math.imul(1664525,seed)+1013904223)>>>0;return seed/4294967296};
+const rnd=seeded(47381);
+function gaussian(rand){return Math.sqrt(-2*Math.log(Math.max(rand(),1e-9)))*Math.cos(2*Math.PI*rand())}
+function generate(seed=14){let rand=seeded(seed);const p=[];for(let i=0;i<80;i++){let cls=i%2;let x=(cls?.69:.30)+gaussian(rand)*.135,y=(cls?.65:.35)+gaussian(rand)*.16;p.push({x:clamp(x,.035,.965),y:clamp(y,.035,.965),label:cls?'Rosa':'Azul'})}return p}
+function dist(a,b,m=metric){let dx=a.x-b.x,dy=a.y-b.y;return m==='manhattan'?Math.abs(dx)+Math.abs(dy):Math.hypot(dx,dy)}
+function predict(from,p,K=k,m=metric){if(!from.length)return {label:null,votes:{},neighbors:[]};let neighbors=from.map((q,i)=>({...q,d:dist(q,p,m),i})).sort((a,b)=>a.d-b.d||a.i-b.i).slice(0,Math.min(K,from.length));let votes={};for(let x of neighbors)votes[x.label]=(votes[x.label]||0)+1;let ordered=Object.keys(votes).sort((a,b)=>votes[b]-votes[a]||neighbors.find(n=>n.label===a).d-neighbors.find(n=>n.label===b).d||a.localeCompare(b));return {label:ordered[0],votes,neighbors}}
+function split(rows){let rand=seeded(71091),groups={};for(let p of rows)(groups[p.label]??=[]).push(p);let tr=[],te=[];for(let group of Object.values(groups)){for(let i=group.length-1;i>0;i--){let j=Math.floor(rand()*(i+1));[group[i],group[j]]=[group[j],group[i]]}let n=group.length===1?1:Math.max(1,Math.floor(group.length*.7));tr.push(...group.slice(0,n));te.push(...group.slice(n))}return [tr,te]}
+function scaleRows(rows){if(!rows.length)return [[],[]];const [tr,te]=split(rows.map(p=>({...p})));let loX=Math.min(...tr.map(p=>p.x)),hiX=Math.max(...tr.map(p=>p.x)),loY=Math.min(...tr.map(p=>p.y)),hiY=Math.max(...tr.map(p=>p.y));let convert=p=>({...p,x:(p.x-loX)/(hiX-loX||1),y:(p.y-loY)/(hiY-loY||1)});return [tr.map(convert),te.map(convert)]}
+function recalc(){classes=[...new Set(points.map(p=>p.label))].sort();[train,test]=scaleRows(points);const start=performance.now();let matrix=Object.fromEntries(classes.map(c=>[c,Object.fromEntries(classes.map(d=>[d,0]))]));let correct=0;for(let p of test){let pred=predict(train,p);if(pred.label===p.label)correct++;if(matrix[p.label]&&pred.label!=null)matrix[p.label][pred.label]++}evalResult={accuracy:test.length?correct/test.length:null,correct,total:test.length,matrix,elapsed:performance.now()-start};updateStats();renderAll()}
+function baseColor(label){let i=classes.indexOf(label);return colors[(i<0?0:i)%colors.length]}
+function updateStats(){const e=evalResult;$('accuracy').textContent=e?.accuracy==null?'—':(100*e.accuracy).toFixed(1)+'%';$('accuracyDial').style.setProperty('--acc',e?.accuracy==null?'0%':(100*e.accuracy).toFixed(1)+'%');$('dashboardK').textContent=k;$('correctCount').textContent=e?.total?`${e.correct} / ${e.total}`:'—';$('performanceStatus').textContent=!e?.total?'Sin datos suficientes':e.accuracy>=.9?'Excelente clasificación':e.accuracy>=.75?'Buen rendimiento':e.accuracy>=.5?'Resultado mejorable':'Revisar el conjunto de datos';$('performanceDetail').textContent=e?.total?`Evaluación independiente con ${e.total} ejemplos no utilizados como vecinos.`:'Añade suficientes ejemplos etiquetados para ver las estadísticas.';$('testCount').textContent=e?.total??'—';$('elapsed').textContent=e?.elapsed==null?'—':e.elapsed.toFixed(1)+' ms';$('evalNote').textContent=e?.total?`${e.correct} predicciones correctas de ${e.total} registros de prueba. Una sola división orientativa; la métrica puede variar según la partición.`:'No hay muestras suficientes para evaluar. Añade registros con clases conocidas.';let html='<table><thead><tr><th>Real ↓ / Pred. →</th>'+classes.map(c=>'<th>'+esc(c)+'</th>').join('')+'</tr></thead><tbody>';for(let c of classes)html+='<tr><th>'+esc(c)+'</th>'+classes.map(d=>`<td style="color:${c===d?'#a4f5d5':'#f9a6ad'}">${e.matrix[c][d]||0}</td>`).join('')+'</tr>'; $('confusion').innerHTML=html+'</tbody></table>'; renderExtendedMetrics(e);renderKChart();}
+function renderExtendedMetrics(e){let matrix=e.matrix;const fmt=v=>Number.isFinite(v)?(v*100).toFixed(1)+'%':'—';let html='<table><thead><tr><th>Categoría / Clase</th><th>Precisión</th><th>Recall</th><th>F1</th><th>Soporte</th></tr></thead><tbody>';for(const c of classes){let tp=matrix[c][c]||0;let row=classes.reduce((n,d)=>n+(matrix[c][d]||0),0);let col=classes.reduce((n,d)=>n+(matrix[d][c]||0),0);let precision=col?tp/col:0,recall=row?tp/row:0,f1=precision+recall?2*precision*recall/(precision+recall):0;html+=`<tr><td style="color:${baseColor(c)}">${esc(c)}</td><td class="miniStat">${fmt(precision)}</td><td class="miniStat">${fmt(recall)}</td><td class="miniStat">${fmt(f1)}</td><td>${row}</td></tr>`}html+='</tbody></table>';$('classMetrics').innerHTML=html;}
+function renderKChart(){const el=$('kChart');if(!el)return;let z=canvasSetup(el);if(!z)return;let {ctx,w,h}=z;ctx.clearRect(0,0,w,h);const pad={l:42,r:13,t:15,b:31},width=w-pad.l-pad.r,height=h-pad.t-pad.b;const count=Math.min(15,train.length);if(!count||!test.length)return;let scores=[];for(let K=1;K<=count;K++){let ok=0;for(const row of test)if(predict(train,row,K,metric).label===row.label)ok++;scores.push(ok/test.length)}const x=i=>pad.l+(count===1?width/2:i/(count-1)*width),y=v=>pad.t+height*(1-v);ctx.font='11px system-ui';ctx.textAlign='right';for(let i=0;i<=4;i++){let t=i/4;ctx.strokeStyle='#2b2b2b';ctx.beginPath();ctx.moveTo(pad.l,y(t));ctx.lineTo(w-pad.r,y(t));ctx.stroke();ctx.fillStyle='#bca38c';ctx.fillText(Math.round(t*100)+'%',pad.l-7,y(t)+4)}ctx.strokeStyle='#ff8b1f';ctx.lineWidth=2.5;ctx.beginPath();scores.forEach((v,i)=>i?ctx.lineTo(x(i),y(v)):ctx.moveTo(x(i),y(v)));ctx.stroke();scores.forEach((v,i)=>{ctx.beginPath();ctx.arc(x(i),y(v),i+1===k?5:3,0,Math.PI*2);ctx.fillStyle=i+1===k?'#ffb04c':'#ff8b1f';ctx.fill()});ctx.strokeStyle='#ffcd71aa';ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(x(k-1),pad.t);ctx.lineTo(x(k-1),h-pad.b);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='#bca38c';ctx.textAlign='center';for(let i=0;i<count;i++){if(i===0||i===count-1||(i+1)%2===1)ctx.fillText(String(i+1),x(i),h-10)}ctx.textAlign='left';ctx.fillStyle='#ffb04c';ctx.fillText('K='+k+' · '+(100*scores[Math.min(k,count)-1]).toFixed(1)+'%',Math.min(w-88,x(k-1)+8),pad.t+12)}
+function classifyRealFlower(){
+ let goals=Number($('realLength').value),assists=Number($('realWidth').value);
+ if(!Number.isFinite(goals)||!Number.isFinite(assists)||goals<0||assists<0||goals>45||assists>30){$('realResult').textContent='Introduce goles (0–45) y asistencias (0–30) válidos.';return;}
+ const labels=['Delantero','Centrocampista','Defensa'];
+ const all=irisRaw.map(r=>({x:r[0],y:r[1],label:labels[r[4]]}));
+ const minX=Math.min(...all.map(p=>p.x)),maxX=Math.max(...all.map(p=>p.x)),minY=Math.min(...all.map(p=>p.y)),maxY=Math.max(...all.map(p=>p.y));
+ const norm=p=>({x:(p.x-minX)/(maxX-minX||1),y:(p.y-minY)/(maxY-minY||1),label:p.label});
+ const candidates=all.map(norm),r=predict(candidates,norm({x:goals,y:assists}),k,metric),winner=r.votes[r.label]||0;
+ const classVotes=labels.map(label=>({label,count:r.votes[label]||0}));
+ $('realResult').innerHTML=`<div class="football-result-top"><span class="eyebrow">PERFIL PREDICHO · K=${k}</span><strong>${esc(r.label||'Sin datos')}</strong><span>${winner} de ${r.neighbors.length} votos · ${metric==='euclidean'?'Distancia euclídea':'Distancia Manhattan'}</span></div><div class="football-result-votes">${classVotes.map(v=>`<div class="football-vote"><span>${esc(v.label)}</span><div><i style="width:${r.neighbors.length?100*v.count/r.neighbors.length:0}%"></i></div><b>${v.count}</b></div>`).join('')}</div><p class="sub">Comparación con 150 futbolistas ficticios. Esta predicción orientativa no evalúa la calidad del jugador ni su posición ideal.</p>`;
+}
+$('classifyReal').onclick=classifyRealFlower;
+for(const [id,a,b] of [['exampleSetosa',27,5],['exampleVersicolor',8,15],['exampleVirginica',2,2]]){$(id).onclick=()=>{$('realLength').value=a;$('realWidth').value=b;classifyRealFlower()}};
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function canvasSetup(el){const dpr=Math.min(devicePixelRatio||1,2),w=el.clientWidth,h=el.clientHeight;if(w<2||h<2)return null;let ww=Math.round(w*dpr),hh=Math.round(h*dpr);if(el.width!==ww||el.height!==hh){el.width=ww;el.height=hh}let ctx=el.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);return {ctx,w,h}}
+function draw(canvas,pts,q,opts={}){let z=canvasSetup(canvas);if(!z)return;let {ctx,w,h}=z;ctx.clearRect(0,0,w,h);ctx.fillStyle='#090909';ctx.fillRect(0,0,w,h);let pad=23,scaleX=x=>pad+x*(w-2*pad),scaleY=y=>h-pad-y*(h-2*pad);let trainPts=opts.trainPts||pts;const K=opts.K||k,met=opts.metric||metric;let showRegions=opts.regions??false; if(showRegions&&trainPts.length){let cell=8;for(let y=pad;y<h-pad;y+=cell)for(let x=pad;x<w-pad;x+=cell){let qp={x:(x-pad)/(w-2*pad),y:1-(y-pad)/(h-2*pad)};let p=predict(trainPts,qp,K,met),c=colors[Math.max(0,classes.indexOf(p.label))%colors.length];ctx.fillStyle=c+'19';ctx.fillRect(x,y,cell+1,cell+1)}}ctx.lineWidth=1;ctx.strokeStyle='#272727';ctx.globalAlpha=.5;for(let i=0;i<=10;i++){let xx=pad+i*(w-2*pad)/10,yy=pad+i*(h-2*pad)/10;ctx.beginPath();ctx.moveTo(xx,pad);ctx.lineTo(xx,h-pad);ctx.moveTo(pad,yy);ctx.lineTo(w-pad,yy);ctx.stroke()}ctx.globalAlpha=1;let result=predict(trainPts,q,K,met),neighbors=result.neighbors;let stage=opts.stage??5;if(stage>=2){for(let i=0;i<Math.min(stage===2?pts.length:neighbors.length,stage===2?pts.length:K);i++){let p=stage===2?pts[i]:neighbors[i];ctx.beginPath();ctx.moveTo(scaleX(q.x),scaleY(q.y));ctx.lineTo(scaleX(p.x),scaleY(p.y));ctx.strokeStyle=stage===2?'#b9d7ff29':'#ffd17c9a';ctx.lineWidth=stage===2?1:1.6;ctx.stroke()}}for(let p of pts){ctx.beginPath();ctx.arc(scaleX(p.x),scaleY(p.y),Math.max(3.1,pts.length>700?3.1:4.7),0,Math.PI*2);ctx.fillStyle=baseColor(p.label);ctx.fill();ctx.strokeStyle='#f0f9ff77';ctx.lineWidth=.8;ctx.stroke()}if(stage>=3){for(let p of neighbors){ctx.beginPath();ctx.arc(scaleX(p.x),scaleY(p.y),9,0,Math.PI*2);ctx.strokeStyle='#ffb04c';ctx.lineWidth=1.5;ctx.stroke()}}ctx.beginPath();ctx.arc(scaleX(q.x),scaleY(q.y),12,0,Math.PI*2);ctx.fillStyle='#ffd17c2d';ctx.fill();ctx.beginPath();ctx.arc(scaleX(q.x),scaleY(q.y),6,0,Math.PI*2);ctx.fillStyle='#ffb04c';ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke();ctx.fillStyle='#c1a991';ctx.font='11px system-ui';ctx.fillText('0',pad-12,h-pad+14);ctx.fillText('1',w-pad-5,h-pad+14);ctx.fillText('1',pad-17,pad+3)}
+const stepDescriptions=['Selecciona un punto desconocido. El objetivo es descubrir su clase.','Calculamos la distancia entre el nuevo punto y cada ejemplo conocido.','Ordenamos todos los candidatos por distancia, de menor a mayor.','Escogemos exclusivamente los K vecinos más cercanos.','Contamos cuántos votos recibe cada clase.','La clase más votada se convierte en nuestra predicción.'];
+function renderSteps(){let active=step===0?0:step;$('stepCount').textContent=step===0?'En directo':`Paso ${step} de 5`;$('stepProgress').style.width=(step/5*100)+'%';$('steps').innerHTML=stepDescriptions.map((s,i)=>`<div class="step ${i===active?'on':i<active?'done':''}"><b>${i===0?'Inicio':i+'.'} </b>${s}</div>`).join('');let r=predict(points,query),major=r.votes[r.label]||0;let detail=step===2?` Se han calculado ${points.length} distancias.`:step===3?` Vecinos elegidos: ${r.neighbors.length}.`:step>=4?` Votos ganadores: ${major}/${r.neighbors.length}.`:'';$('explanation').textContent=stepDescriptions[step]+detail;$('prevStep').disabled=step===0;$('nextStep').disabled=step===5}
+function updateLiveKMetrics(result){
+  const n=result.neighbors.length;
+  $('liveK').textContent=n+ ' / '+points.length;
+  $('liveAvgDistance').textContent=n?(result.neighbors.reduce((sum,p)=>sum+p.d,0)/n).toFixed(3):'—';
+  const winningVotes=result.votes[result.label]||0;
+  $('liveVote').textContent=n?winningVotes+' / '+n:'—';
+  const counts=classes.map(c=>({c,v:result.votes[c]||0}));
+  $('liveClassVotes').innerHTML=counts.map(({c,v})=>`<div class="live-vote-row"><span>${esc(c)}</span><div class="live-vote-track"><div style="width:${n?100*v/n:0}%;background:${baseColor(c)}"></div></div><b>${v} (${n?(100*v/n).toFixed(0):0}%)</b></div>`).join('');
+  const sortVotes=counts.map(t=>t.v).sort((a,b)=>b-a);
+  const lead=(sortVotes[0]||0)-(sortVotes[1]||0);
+  $('kInsight').textContent=n?`Con K=${k}, ${result.label} gana por ${lead} voto(s) de margen. Este panel mide la decisión actual; la accuracy del test puede permanecer igual para varios valores de K.`:'Añade puntos para calcular la predicción.';
+}
+function renderAll(){let result=predict(points,query),n=result.neighbors.length;updateLiveKMetrics(result);let cnt=result.votes[result.label]||0;$('prediction').textContent=result.label||'—';$('prediction').style.color=result.label?baseColor(result.label):'#fff';$('votes').textContent=n?`${cnt}/${n}`:'—';$('confidence').textContent=n?(100*cnt/n).toFixed(0)+'%':'—';$('voteBars').innerHTML=classes.map(c=>`<div class="barrow"><span title="${esc(c)}">${esc(c.slice(0,13))}</span><div class="track"><div class="fill" style="width:${n?(result.votes[c]||0)/n*100:0}%;background:${baseColor(c)}"></div></div><b>${result.votes[c]||0}</b></div>`).join('');$('neighbors').innerHTML=result.neighbors.map((p,i)=>`<tr><td>${i+1}</td><td style="color:${baseColor(p.label)}">${esc(p.label)}</td><td>${p.d.toFixed(3)}</td><td>${p.x.toFixed(2)}, ${p.y.toFixed(2)}</td></tr>`).join('');$('kLabel').textContent=k;renderSteps();draw($('plot'),points,query,{regions:$('regions').value==='on'&&step===0&&points.length<=600,stage:step===0?5:step,trainPts:points})}
+function setData(rows,name){points=rows;currentType=name;query={x:.52,y:.50};step=0;let max=Math.min(15,points.length);$('k').max=Math.max(1,max);k=Math.min(5,max||1);$('k').value=k;$('kMax').textContent=$('k').max;$('k').style.setProperty('--k-fill',((k-1)/Math.max(1,Number($('k').max)-1)*100)+'%');$('datasetPill').textContent=name==='synthetic'?'Datos sintéticos':name==='iris'?'Fútbol · 150 jugadores':'CSV personalizado';recalc();switchTab('lab')}
+function switchTab(t){document.querySelectorAll('.tab').forEach(el=>el.classList.toggle('hidden',el.id!==t));document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===t));setTimeout(()=>{if(t==='lab')renderAll();if(t==='challenge')drawChallenge()},30)}
+document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>switchTab(b.dataset.go));
+function updateK(v){k=clamp(Math.round(Number(v)),1,Number($('k').max));$('k').value=k;$('k').style.setProperty('--k-fill',((k-1)/Math.max(1,Number($('k').max)-1)*100)+'%');step=0;recalc();} $('k').oninput=e=>updateK(e.target.value);$('kMinus').onclick=()=>updateK(k-1);$('kPlus').onclick=()=>updateK(k+1);$('distance').onchange=e=>{metric=e.target.value;step=0;recalc()};$('regions').onchange=renderAll;
+$('random').onclick=()=>setData(generate(Math.floor(Math.random()*1000000)),'synthetic');$('reset').onclick=()=>setData(generate(14),'synthetic');$('clear').onclick=()=>setData([],'synthetic');
+let draggingQuery=false;function moveQueryPointer(e){let r=$('plot').getBoundingClientRect(),pad=23;query={x:clamp((e.clientX-r.left-pad)/(r.width-2*pad),0,1),y:clamp(1-(e.clientY-r.top-pad)/(r.height-2*pad),0,1)};step=0;renderAll()}$('plot').addEventListener('pointermove',e=>{if(draggingQuery)moveQueryPointer(e)});$('plot').addEventListener('pointerup',()=>draggingQuery=false);$('plot').addEventListener('pointercancel',()=>draggingQuery=false);$('plot').addEventListener('lostpointercapture',()=>draggingQuery=false);$('plot').addEventListener('pointerdown',e=>{let r=$('plot').getBoundingClientRect(),pad=23,x=clamp((e.clientX-r.left-pad)/(r.width-2*pad),0,1),y=clamp(1-(e.clientY-r.top-pad)/(r.height-2*pad),0,1),mode=$('mode').value;if(mode==='query'){draggingQuery=true;$('plot').setPointerCapture(e.pointerId);moveQueryPointer(e)}else if(mode==='erase'){if(!points.length)return;let near=points.reduce((a,p,i)=>dist(p,{x,y})<a.d?{d:dist(p,{x,y}),i}:a,{d:Infinity,i:-1});if(near.d<.065)points.splice(near.i,1);step=0;recalc()}else {points.push({x,y,label:mode==='blue'?'Azul':'Rosa'});step=0;recalc()}});
+$('prevStep').onclick=()=>{step=Math.max(0,step-1);renderAll()};$('nextStep').onclick=()=>{step=Math.min(5,step+1);renderAll()};async function animate(){if(playing)return;playing=true;$('playSteps').disabled=true;$('animate').disabled=true;step=0;renderAll();for(let i=1;i<=5&&playing;i++){await sleep(i===1?480:950);if(!playing)break;step=i;renderAll()}playing=false;$('playSteps').disabled=false;$('animate').disabled=false}$('playSteps').onclick=animate;$('animate').onclick=animate;
+$('presentBtn').onclick=()=>{document.body.classList.toggle('present');$('presentBtn').textContent=document.body.classList.contains('present')?'Salir presentación':'Modo presentación';setTimeout(renderAll,100)};document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.body.classList.contains('present'))$('presentBtn').click();if(document.body.classList.contains('present')&&e.key==='ArrowRight')$('nextStep').click();if(document.body.classList.contains('present')&&e.key==='ArrowLeft')$('prevStep').click()});
+function newChallenge(){challenge.points=generate(Math.floor(Math.random()*1000000));challenge.query={x:.12+Math.random()*.76,y:.12+Math.random()*.76};challenge.answered=false;$('challengeMessage').textContent='¿Qué clase elegirán los cinco vecinos?';$('guessBlue').disabled=false;$('guessPink').disabled=false;drawChallenge()}function drawChallenge(){let prev=classes;classes=['Azul','Rosa'];draw($('challengePlot'),challenge.points,challenge.query,{K:5,metric:'euclidean',regions:false,stage:challenge.answered?5:1});classes=prev}function guess(value){if(challenge.answered)return;challenge.answered=true;let answer=predict(challenge.points,challenge.query,5,'euclidean').label;let ok=answer===value;challenge.attempts++;if(ok){challenge.hits++;challenge.streak++}else challenge.streak=0;$('challengeHits').textContent=challenge.hits;$('challengeAttempts').textContent=challenge.attempts;$('challengeStreak').textContent=challenge.streak;$('challengeMessage').textContent=(ok?'✅ ¡Correcto! ':'❌ Casi. ')+`KNN predice ${answer}. Observa los cinco vecinos resaltados.`;$('guessBlue').disabled=true;$('guessPink').disabled=true;drawChallenge()};$('guessBlue').onclick=()=>guess('Azul');$('guessPink').onclick=()=>guess('Rosa');$('newChallenge').onclick=newChallenge;
+// 150 simulated football scouting profiles (50 per position), not official player statistics.
+const IRIS_CSV=`22,5,23,30,0
+22,2,27,22,0
+21,6,26,33,0
+28,6,17,16,0
+25,10,24,23,0
+27,2,21,28,0
+29,5,27,26,0
+28,3,29,12,0
+5,4,16,31,0
+28,2,32,16,0
+22,5,25,31,0
+27,7,30,28,0
+19,4,20,28,0
+21,13,17,15,0
+28,10,29,31,0
+33,6,11,20,0
+30,2,24,26,0
+21,8,29,43,0
+27,4,19,17,0
+30,4,23,30,0
+18,5,7,15,0
+19,7,35,24,0
+25,7,34,31,0
+25,3,32,27,0
+32,6,42,21,0
+34,6,19,15,0
+22,10,31,30,0
+6,8,29,20,0
+19,6,40,16,0
+20,10,20,21,0
+24,2,26,14,0
+29,6,45,26,0
+33,2,23,27,0
+35,1,33,29,0
+34,8,24,20,0
+14,7,22,40,0
+19,7,10,21,0
+25,8,37,24,0
+15,7,29,28,0
+18,9,25,30,0
+32,8,27,41,0
+25,5,25,36,0
+24,8,35,20,0
+11,7,26,19,0
+29,8,15,28,0
+22,2,28,24,0
+18,8,28,19,0
+26,9,18,27,0
+23,13,7,30,0
+21,6,41,24,0
+17,11,59,64,1
+5,13,50,75,1
+0,23,52,100,1
+4,14,95,58,1
+2,10,60,83,1
+13,12,33,65,1
+13,15,29,71,1
+14,24,61,77,1
+3,9,55,80,1
+10,11,39,60,1
+3,16,24,67,1
+10,21,55,88,1
+6,9,45,96,1
+12,15,97,71,1
+10,15,51,109,1
+14,6,49,79,1
+11,6,25,41,1
+8,12,58,60,1
+3,3,58,78,1
+12,17,52,94,1
+7,10,47,63,1
+0,14,57,66,1
+5,15,76,73,1
+6,10,53,52,1
+7,13,78,87,1
+12,9,63,54,1
+9,15,44,104,1
+10,3,61,65,1
+8,15,59,39,1
+3,17,71,102,1
+15,3,64,41,1
+14,14,39,104,1
+11,4,58,60,1
+8,11,72,49,1
+9,22,43,75,1
+9,10,62,74,1
+4,22,64,69,1
+5,9,70,70,1
+10,12,62,70,1
+11,12,65,83,1
+8,9,42,60,1
+4,17,53,97,1
+17,13,34,66,1
+8,6,51,77,1
+6,9,44,101,1
+7,9,49,87,1
+5,15,63,84,1
+14,10,69,59,1
+6,19,65,72,1
+3,16,46,57,1
+2,3,55,31,2
+3,2,109,33,2
+2,2,103,12,2
+2,2,92,29,2
+3,5,95,24,2
+1,4,100,42,2
+2,3,90,26,2
+3,0,105,34,2
+5,7,86,27,2
+3,7,62,32,2
+0,0,57,13,2
+5,1,87,15,2
+4,1,113,17,2
+1,3,91,41,2
+3,1,81,21,2
+4,4,89,36,2
+2,3,94,42,2
+3,2,73,34,2
+2,4,59,37,2
+0,1,109,14,2
+3,3,74,40,2
+6,0,66,35,2
+0,2,93,34,2
+3,3,78,40,2
+2,4,82,28,2
+3,3,74,35,2
+6,3,103,35,2
+5,4,95,36,2
+3,1,91,8,2
+3,4,112,29,2
+5,3,74,13,2
+1,0,102,25,2
+4,3,109,38,2
+2,2,82,11,2
+4,5,91,22,2
+5,0,94,28,2
+2,6,108,24,2
+3,2,82,14,2
+6,5,105,16,2
+7,7,94,18,2
+1,4,75,27,2
+5,0,125,43,2
+1,0,86,17,2
+2,0,87,45,2
+1,2,66,33,2
+3,7,95,23,2
+4,2,68,30,2
+3,3,97,22,2
+4,6,72,44,2
+3,1,132,29,2`;
+irisRaw=IRIS_CSV.trim().split('\n').map(line=>line.split(',').map(Number));
+function irisPoints(){let a=Number($('irisX').value),b=Number($('irisY').value);let raw=irisRaw.map(r=>({x:r[a],y:r[b],label:['Delantero','Centrocampista','Defensa'][r[4]]}));let xs=raw.map(p=>p.x),ys=raw.map(p=>p.y),loX=Math.min(...xs),hiX=Math.max(...xs),loY=Math.min(...ys),hiY=Math.max(...ys);return raw.map(p=>({x:(p.x-loX)/(hiX-loX||1),y:(p.y-loY)/(hiY-loY||1),label:p.label}))}
+$('loadIris').onclick=()=>setData(irisPoints(),'iris');$('restoreSynthetic').onclick=()=>setData(generate(14),'synthetic');$('irisX').onchange=$('irisY').onchange=()=>{if(currentType==='iris')setData(irisPoints(),'iris')};
+let csvData=null;
+function parseCSV(text){text=text.replace(/^\uFEFF/,'');let sample=text.split(/\r?\n/).find(s=>s.trim())||'';let delims=[',',';','\t'],count=d=>{let quoted=false,n=0;for(let ch of sample){if(ch==='"')quoted=!quoted;else if(ch===d&&!quoted)n++}return n},delim=delims.sort((a,b)=>count(b)-count(a))[0];let result=[],row=[],field='',quoted=false;for(let i=0;i<text.length;i++){let c=text[i];if(c==='"'){if(quoted&&text[i+1]==='"'){field+='"';i++}else quoted=!quoted}else if(c===delim&&!quoted){row.push(field.trim());field=''}else if((c==='\n'||c==='\r')&&!quoted){if(c==='\r'&&text[i+1]==='\n')i++;row.push(field.trim());if(row.some(Boolean))result.push(row);row=[];field=''}else field+=c}if(quoted)throw Error('Hay comillas sin cerrar');row.push(field.trim());if(row.some(Boolean))result.push(row);return result}
+$('csv').onchange=async e=>{let file=e.target.files?.[0];if(!file)return;try{if(file.size>3e6)throw Error('Máximo 3 MB por archivo');csvData=parseCSV(await file.text());if(csvData.length<4||csvData[0].length<3)throw Error('Se necesitan encabezados y al menos 3 filas y 3 columnas');let heads=csvData[0].map((h,i)=>h||'Columna '+(i+1));for(let id of ['csvX','csvY','csvLabel'])$(id).innerHTML=heads.map((h,i)=>`<option value="${i}">${esc(h)}</option>`).join('');$('csvX').value='0';$('csvY').value='1';$('csvLabel').value=String(heads.length-1);$('csvFields').classList.remove('hidden');$('loadCSV').disabled=false;$('csvMessage').textContent=`Leídas ${csvData.length-1} filas; selecciona columnas.`}catch(err){$('csvMessage').textContent='Error: '+err.message;$('loadCSV').disabled=true}};
+function num(s){let t=String(s).trim();if(!t)return NaN;return Number(t.replace(',','.'))}
+$('loadCSV').onclick=()=>{try{let a=Number($('csvX').value),b=Number($('csvY').value),c=Number($('csvLabel').value);if(new Set([a,b,c]).size!==3)throw Error('Selecciona tres columnas diferentes');let rows=csvData.slice(1).filter(r=>r.length>Math.max(a,b,c)&&Number.isFinite(num(r[a]))&&Number.isFinite(num(r[b]))&&r[c].trim()).slice(0,3000).map(r=>({x:num(r[a]),y:num(r[b]),label:r[c].trim()}));if(rows.length<8)throw Error('Necesitas al menos ocho filas numéricas válidas');if(new Set(rows.map(p=>p.label)).size>8)throw Error('Se admiten como máximo ocho clases');let xs=rows.map(p=>p.x),ys=rows.map(p=>p.y),lx=Math.min(...xs),hx=Math.max(...xs),ly=Math.min(...ys),hy=Math.max(...ys);setData(rows.map(p=>({x:(p.x-lx)/(hx-lx||1),y:(p.y-ly)/(hy-ly||1),label:p.label})),'csv');$('csvMessage').textContent='CSV importado correctamente'}catch(err){$('csvMessage').textContent='Error: '+err.message}};
+$('sampleCSV').onclick=()=>{let content='goles,asistencias,posicion\n27,5,Delantero\n21,8,Delantero\n30,4,Delantero\n8,13,Centrocampista\n6,15,Centrocampista\n11,10,Centrocampista\n3,2,Defensa\n1,5,Defensa\n4,2,Defensa';let a=document.createElement('a'),blob=new Blob([content],{type:'text/csv;charset=utf-8'});a.href=URL.createObjectURL(blob);a.download='ejemplo_knn.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
+window.addEventListener('resize',()=>{renderAll();if(!$('challenge').classList.contains('hidden'))drawChallenge()});setData(generate(14),'synthetic');newChallenge();
+</script></body></html>
