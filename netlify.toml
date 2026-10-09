@@ -1,0 +1,8 @@
+[build]
+  publish = "."
+
+# Serve the KNN lab page at the site root
+[[redirects]]
+  from = "/"
+  to = "/knn_lab_ultimate_esports.html"
+  status = 200
