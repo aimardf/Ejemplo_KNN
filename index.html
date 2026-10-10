@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>KNN LAB ULTIMATE · Studio</title>
+<style>
+
+:root{
+  color-scheme:dark;
+  --bg:#060606;
+  --bg-elev:#0b0b0b;
+  --panel:#101010;
+  --panel2:#151515;
+  --line:#2a2a2a;
+  --line-soft:#1d1d1d;
+  --text:#f6f0ea;
+  --muted:#a69381;
+  --a:#ff7a18;
+  --b:#ffd08d;
+  --accent:#ff8b1f;
+  --accent-2:#ffb04c;
+  --accent-soft:rgba(255,139,31,.14);
+  --glow:rgba(255,122,24,.32);
+  --success:#ffb04c;
+  --gold:#ffc46b;
+  --shadow:0 18px 60px rgba(0,0,0,.38);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  font:15px/1.6 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  color:var(--text);
+  background:
+    radial-gradient(circle at 12% 0%, rgba(255,122,24,.18), transparent 28%),
+    radial-gradient(circle at 100% 15%, rgba(255,122,24,.09), transparent 30%),
+    linear-gradient(180deg,#090909 0%, #050505 100%);
+  min-height:100vh;
+}
+button,input,select{font:inherit}
+button{
+  cursor:pointer;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:10px 14px;
+  background:linear-gradient(180deg,#151515,#101010);
+  color:var(--text);
+  transition:transform .18s ease,border-color .18s ease,background .18s ease,box-shadow .18s ease,opacity .18s ease;
+  box-shadow:0 0 0 rgba(0,0,0,0);
+}
+button:hover{border-color:#6f4420;background:linear-gradient(180deg,#1c1c1c,#121212);transform:translateY(-1px);box-shadow:0 10px 24px rgba(0,0,0,.2)}
+button:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+.primary{
+  background:linear-gradient(135deg,var(--accent),#ff6a00);
+  color:#120900;
+  border-color:transparent;
+  font-weight:800;
+  box-shadow:0 0 0 1px rgba(255,255,255,.03) inset,0 0 25px rgba(255,122,24,.25);
+}
+.primary:hover{filter:brightness(1.06);box-shadow:0 0 0 1px rgba(255,255,255,.06) inset,0 0 28px rgba(255,122,24,.35)}
+.shell{max-width:1520px;margin:auto;padding:32px 24px 58px}
+.top{
+  display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap;
+  padding:22px 24px;
+  margin-bottom:22px;
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:24px;
+  background:linear-gradient(180deg,rgba(20,20,20,.92),rgba(11,11,11,.92));
+  box-shadow:var(--shadow), inset 0 1px 0 rgba(255,255,255,.03);
+  backdrop-filter: blur(10px);
+}
+.brand{display:flex;align-items:center;gap:16px}
+.logo{
+  width:56px;height:56px;display:grid;place-items:center;
+  font-size:23px;font-weight:900;letter-spacing:.08em;
+  color:#170b00;
+  background:linear-gradient(135deg,#ff9a38,#ff6a00);
+  border-radius:18px;
+  box-shadow:0 0 28px rgba(255,122,24,.28);
+}
+.eyebrow{color:var(--accent-2);font-size:11px;font-weight:800;letter-spacing:.22em;text-transform:uppercase}
+h1{font-size:31px;line-height:1.02;margin:4px 0 6px;letter-spacing:-.03em}
+h2{font-size:19px;letter-spacing:-.02em;margin:0 0 12px}
+h3{font-size:15px;letter-spacing:-.01em;margin:0 0 10px}
+.sub{color:var(--muted);font-size:13px}
+nav{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 24px}
+nav button{
+  background:rgba(18,18,18,.8);
+  border-radius:999px;
+  padding:10px 14px;
+}
+nav button.active{
+  background:linear-gradient(135deg,rgba(255,139,31,.18),rgba(255,139,31,.1));
+  border-color:rgba(255,139,31,.55);
+  color:#fff4ea;
+  box-shadow:0 0 0 1px rgba(255,139,31,.1) inset, 0 0 18px rgba(255,122,24,.12);
+}
+.layout{display:grid;grid-template-columns:minmax(420px,1.45fr) minmax(320px,1fr);gap:18px}
+.stack{display:grid;gap:18px;align-content:start}
+.card{
+  position:relative;
+  background:linear-gradient(180deg,rgba(17,17,17,.98),rgba(11,11,11,.98));
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:22px;
+  padding:20px;
+  box-shadow:var(--shadow), inset 0 1px 0 rgba(255,255,255,.02);
+  overflow:hidden;
+}
+.card::before{
+  content:"";position:absolute;inset:0 auto auto 0;height:1px;width:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,139,31,.35),transparent);
+  pointer-events:none;
+}
+.head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.pill{
+  display:inline-flex;align-items:center;gap:6px;
+  border:1px solid rgba(255,139,31,.24);
+  padding:5px 10px;border-radius:999px;
+  color:#ffd7b0;font-size:12px;
+  background:rgba(255,139,31,.08);
+}
+.canvasbox{
+  position:relative;margin-top:14px;
+  background:linear-gradient(180deg,#0a0a0a,#111111);
+  border:1px solid #242424;
+  border-radius:18px;overflow:hidden;aspect-ratio:1.55;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.02);
+}
+canvas{width:100%;height:100%;display:block;touch-action:none;cursor:crosshair}
+.legend{display:flex;gap:17px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:12px}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;background:var(--a);box-shadow:0 0 12px rgba(255,122,24,.3)}
+.controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:15px 0}
+.field{display:grid;gap:6px;color:#d9c5b2;font-size:12px}
+.field select,.field input[type=number]{width:100%;background:#0e0e0e;color:var(--text);padding:10px 11px;border:1px solid #2f2f2f;border-radius:12px}
+.field input[type=range]{width:100%;accent-color:var(--accent)}
+.actions{display:flex;flex-wrap:wrap;gap:9px}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.metric{
+  border:1px solid #252525;border-radius:16px;padding:13px;background:linear-gradient(180deg,#121212,#0e0e0e);
+}
+.metric strong{display:block;font-size:24px;font-variant-numeric:tabular-nums;letter-spacing:-.03em}
+.metric small{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em}
+.info{
+  padding:13px 14px;border-radius:14px;border:1px solid rgba(255,139,31,.18);
+  background:linear-gradient(180deg,rgba(255,139,31,.08),rgba(255,139,31,.04));
+  color:#f1d2af;font-size:13px;
+}
+.progress{height:7px;background:#202020;border-radius:30px;overflow:hidden}
+.progress>div{height:100%;background:linear-gradient(90deg,#ff6a00,var(--accent-2));width:0;transition:width .35s;box-shadow:0 0 18px rgba(255,122,24,.25)}
+.steps{display:grid;gap:8px;margin:12px 0}
+.step{padding:10px 12px;border:1px solid #232323;border-radius:12px;color:var(--muted);font-size:13px;background:#101010}
+.step.on{border-color:rgba(255,139,31,.5);background:rgba(255,139,31,.10);color:white}
+.step.done{border-color:rgba(255,176,76,.45);color:#ffe3bf;background:rgba(255,176,76,.07)}
+.barrow{display:grid;grid-template-columns:82px 1fr 35px;gap:8px;align-items:center;font-size:12px}
+.track{height:11px;border-radius:20px;background:#202020;overflow:hidden}
+.fill{height:100%;transition:width .25s;background:linear-gradient(90deg,var(--accent),var(--accent-2))}
+.hidden{display:none!important}
+.wide{grid-column:1/-1}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.lesson{background:linear-gradient(180deg,#131313,#0e0e0e);border-radius:18px;border:1px solid #252525;padding:16px}
+.lesson p{margin:8px 0;color:#ddd1c6}
+.muted{color:var(--muted)}
+.score{font-size:42px;font-weight:900;color:var(--accent-2);text-shadow:0 0 18px rgba(255,176,76,.15)}
+.tablewrap{overflow:auto;max-height:290px;border-radius:14px;border:1px solid #222;background:#0d0d0d}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid #202020}
+th{color:#ffd2a4;position:sticky;top:0;background:#141414}
+.message{min-height:27px;font-size:13px;color:#f5c58d}
+.glow{color:var(--accent-2);text-shadow:0 0 14px rgba(255,176,76,.14)}
+.footer{margin-top:25px;text-align:center;font-size:12px;color:var(--muted)}
+.present .shell{max-width:1760px}
+.present .layout{grid-template-columns:minmax(600px,1.6fr) minmax(350px,1fr)}
+.present .canvasbox{aspect-ratio:1.85}
+.present .card{font-size:17px}
+.present nav{display:none}
+.present h1{font-size:36px}
+.present .sub{font-size:15px}
+.file{width:100%;color:#d8eaff}
+kbd{padding:2px 6px;border:1px solid #4d3a28;border-radius:6px;background:#17110d;color:#ffd8b0}
+pre{white-space:pre-wrap;font-size:12px;color:#ffca90}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.present .layout{grid-template-columns:1fr}.grid3{grid-template-columns:1fr}}
+@media(max-width:500px){.shell{padding:16px 11px}.top{padding:18px}.controls{grid-template-columns:1fr}.metrics{gap:5px}.metric{padding:8px}.metric strong{font-size:19px}.canvasbox{aspect-ratio:1.14}}
+.livechart{margin-top:20px;padding:14px;border:1px solid #252525;border-radius:18px;background:linear-gradient(180deg,#0f0f0f,#0b0b0b)}
+.livechart canvas{width:100%;height:185px;display:block}
+.casehero{
+  padding:22px;margin-bottom:18px;border:1px solid rgba(255,139,31,.18);border-radius:22px;
+  background:radial-gradient(circle at 100% 0%, rgba(255,122,24,.14), transparent 35%), linear-gradient(180deg,#151515,#101010);
+}
+.casehero h2{font-size:26px;margin:4px 0 8px;letter-spacing:-.03em}
+.casehero p{max-width:790px;color:#ddd1c6}
+.realresult{padding:16px;border-radius:16px;border:1px solid #2b2b2b;background:#0d0d0d;margin:14px 0;font-size:17px}
+.realresult b{color:var(--accent-2)}
+.classStatsValue{font-weight:750}
+.miniStat{font-variant-numeric:tabular-nums}
+#classMetrics td,#classMetrics th{white-space:nowrap}
+@media(max-width:720px){.casehero{padding:14px}}
+
+</style></head><body><div class="shell">
+<header class="top"><div class="brand"><div class="logo">K</div><div><div class="eyebrow">Machine Learning · Interactive Studio</div><h1>KNN LAB <span class="glow">ULTIMATE</span></h1><div class="sub">Una experiencia visual y profesional para entender, evaluar y presentar el algoritmo KNN.</div></div></div><button id="presentBtn">Modo presentación</button></header>
+<nav id="tabs"><button class="active" data-tab="lab">Laboratorio</button><button data-tab="learn">Fundamentos</button><button data-tab="challenge">Desafío</button><button data-tab="data">eSports y CSV</button><button data-tab="about">Aplicaciones</button></nav>
+<section id="lab" class="tab"><div class="layout"><div class="stack"><article class="card"><div class="head"><div><h2>Mapa de clasificación</h2><div class="sub" id="mapDescription">Haz clic en el gráfico para colocar el punto que quieras clasificar.</div></div><span class="pill" id="datasetPill">Datos sintéticos</span></div><div class="canvasbox"><canvas id="plot" aria-label="Plano de clasificación KNN interactivo"></canvas></div><div class="legend"><span><i class="dot"></i> Clase azul</span><span><i class="dot" style="background:var(--b)"></i> Clase rosa</span><span><i class="dot" style="background:#ffcf74"></i> Punto desconocido</span><span>◎ Vecinos seleccionados</span></div><div class="controls"><label class="field">Número de vecinos: <b id="kLabel">5</b><input id="k" type="range" min="1" max="15" value="5"></label><label class="field">Distancia<select id="distance"><option value="euclidean">Euclídea · √(Δx² + Δy²)</option><option value="manhattan">Manhattan · |Δx| + |Δy|</option></select></label><label class="field">Interacción con el gráfico<select id="mode"><option value="query">Mover punto desconocido</option><option value="blue">Añadir puntos azules</option><option value="pink">Añadir puntos rosas</option><option value="erase">Borrar puntos cercanos</option></select></label><label class="field">Visualización<select id="regions"><option value="on">Regiones de decisión</option><option value="off">Ocultar regiones</option></select></label></div><div class="actions"><button class="primary" id="animate">Explicar paso a paso</button><button id="random">Nuevos puntos</button><button id="reset">Restablecer</button><button id="clear">Vaciar mapa</button></div></article><article class="card"><div class="head"><h2>Proceso de decisión</h2><span class="pill" id="stepCount">En directo</span></div><div class="progress"><div id="stepProgress"></div></div><div id="steps" class="steps"></div><div class="actions"><button id="prevStep">← Anterior</button><button id="nextStep">Siguiente →</button><button id="playSteps" class="primary">Reproducir</button></div><p class="info" id="explanation">KNN compara el punto desconocido con todos los puntos conocidos y utiliza los K más cercanos para votar.</p></article></div>
+<div class="stack"><article class="card"><h2>Resultado en directo</h2><div class="metrics"><div class="metric"><small>Predicción</small><strong id="prediction">—</strong></div><div class="metric"><small>Votos mayoría</small><strong id="votes">—</strong></div><div class="metric"><small>Confianza de voto*</small><strong id="confidence">—</strong></div></div><p class="sub">* Es la proporción de votos, no una probabilidad calibrada de acierto.</p><div id="voteBars" class="stack" style="margin-top:12px"></div></article><article class="card"><h2>Dashboard de estadísticas</h2><p class="sub">Evaluación independiente: división estratificada 70 % entrenamiento / 30 % prueba, con semilla fija. Los datos del test no votan.</p><div class="metrics"><div class="metric"><small>Precisión (accuracy)</small><strong id="accuracy">—</strong></div><div class="metric"><small>Test</small><strong id="testCount">—</strong></div><div class="metric"><small>Tiempo aprox.</small><strong id="elapsed">—</strong></div></div><div class="livechart"><div class="head"><h3>📈 Precisión según K</h3><span class="pill">Test independiente</span></div><canvas id="kChart" aria-label="Gráfica de precisión frente al número de vecinos"></canvas><p class="sub">Cada punto representa la precisión de ese K en el mismo test. La línea vertical marca tu K actual. Elegir el mejor K mirando repetidamente el test sesgaría la evaluación: para optimizar K haría falta validación adicional.</p></div><h3>Resultados por clase</h3><div class="tablewrap" id="classMetrics"></div><p class="sub">Precisión: de las predicciones de una clase, cuántas fueron correctas. Recall: de los ejemplos reales de esa clase, cuántos detectó. F1: equilibrio entre ambas.</p><h3 style="margin-top:15px">Matriz de confusión</h3><div class="tablewrap" id="confusion"></div><div class="info" id="evalNote">Esta métrica se calcula sobre puntos que no se utilizan como vecinos.</div></article><article class="card"><h2>Vecinos y distancias</h2><div class="tablewrap"><table><thead><tr><th>#</th><th>Clase</th><th>Distancia</th><th>Coordenadas</th></tr></thead><tbody id="neighbors"></tbody></table></div></article></div></div></section>
+<section id="learn" class="tab hidden"><div class="card"><h2>KNN explicado sin complicaciones</h2><div class="grid3"><div class="lesson"><h3>01 · Datos etiquetados</h3><p>Disponemos de ejemplos previos, cada uno con unas características (x, y) y una clase conocida.</p></div><div class="lesson"><h3>02 · Calcular distancias</h3><p>Para un ejemplo nuevo, calculamos lo cerca que está de todos los ejemplos de entrenamiento.</p></div><div class="lesson"><h3>03 · Elegir K</h3><p>Ordenamos por distancia y nos quedamos con los K puntos más cercanos.</p></div><div class="lesson"><h3>04 · Votación</h3><p>La clase más repetida entre los vecinos será la predicción. En un empate se usa un criterio fijo.</p></div><div class="lesson"><h3>05 · Validar</h3><p>Evaluamos sobre datos que no participaron en la búsqueda de vecinos. La precisión no debe medirse usando los mismos ejemplos.</p></div><div class="lesson"><h3>06 · Ajustar</h3><p>K pequeño puede reaccionar al ruido; K grande puede borrar fronteras entre clases. La escala de cada variable importa.</p></div></div><h2 style="margin-top:20px">🧮 Fórmulas importantes</h2><div class="grid3"><div class="lesson"><b>Euclídea</b><p>d(A,B) = √[(x₂−x₁)² + (y₂−y₁)²]</p><div class="sub">Distancia en línea recta.</div></div><div class="lesson"><b>Manhattan</b><p>d(A,B) = |x₂−x₁| + |y₂−y₁|</p><div class="sub">Distancia por movimientos horizontales y verticales.</div></div><div class="lesson"><b>Accuracy</b><p>Predicciones correctas / Total del test</p><div class="sub">Sirve como resumen, pero puede engañar si las clases están desequilibradas.</div></div></div><p class="info" style="margin-top:16px">KNN es un algoritmo supervisado y basado en instancias: conserva los ejemplos y calcula vecinos al predecir. En este laboratorio se normalizan las variables al rango 0–1 antes de comparar distancias.</p><button class="primary" data-go="lab">Probarlo en el laboratorio →</button></div></section>
+<section id="challenge" class="tab hidden"><div class="layout"><div class="stack"><article class="card"><h2>Desafío: piensa como KNN</h2><p class="sub">Mira el gráfico, valora los vecinos cercanos y predice la clasificación. La respuesta está oculta hasta que elijas.</p><div class="canvasbox"><canvas id="challengePlot" aria-label="Gráfico del desafío"></canvas></div><div class="actions" style="margin-top:15px"><button id="guessBlue">Será azul</button><button id="guessPink">Será rosa</button><button id="newChallenge">↻ Nuevo reto</button></div><p id="challengeMessage" class="message" aria-live="polite">¿Qué clase ganará la votación?</p></article></div><div class="stack"><article class="card"><h2>Marcador</h2><div class="metrics"><div class="metric"><small>Aciertos</small><strong id="challengeHits">0</strong></div><div class="metric"><small>Intentos</small><strong id="challengeAttempts">0</strong></div><div class="metric"><small>Racha</small><strong id="challengeStreak">0</strong></div></div><p class="info" style="margin-top:15px">Aquí no gana quien adivine «la clase verdadera», sino quien deduzca correctamente lo que decidiría el algoritmo KNN.</p><p class="sub">En cada reto se generan puntos nuevos y se usa K=5 con distancia euclídea.</p></article></div></div></section>
+<section id="data" class="tab hidden"><div class="layout"><div class="stack"><article class="card"><h2>Laboratorio eSports</h2><p class="sub">Caso práctico inspirado en analítica de videojuegos competitivos. Trabajamos con 150 perfiles simulados de jugadores: Atacante, Estratega y Apoyo. Los datos son sintéticos, no estadísticas oficiales de un videojuego.</p><div class="casehero"><div class="eyebrow">CASO PRÁCTICO · GAMING ANALYTICS</div><h2>¿Qué tipo de jugador eres?</h2><p>Un equipo de eSports quiere descubrir cómo juega cada persona. KNN compara sus estadísticas con jugadores previamente clasificados y predice su estilo de juego. Prueba distintos perfiles y comprueba cómo cambia el resultado al modificar K.</p><div class="controls"><label class="field">Eliminaciones por partida<input id="realLength" type="number" min="0" max="40" step="1" value="23"></label><label class="field">Asistencias por partida<input id="realWidth" type="number" min="0" max="40" step="1" value="5"></label></div><div class="actions"><button class="primary" id="classifyReal">Analizar jugador</button><button id="exampleSetosa">Perfil atacante</button><button id="exampleVersicolor">Perfil estratega</button><button id="exampleVirginica">Perfil apoyo</button></div><div class="realresult" id="realResult" aria-live="polite">Introduce tus estadísticas para descubrir tu estilo según KNN.</div><p class="sub">Demostración educativa con perfiles sintéticos. La votación de vecinos no equivale a una probabilidad real. Este modelo simplificado no determina la habilidad de una persona.</p></div><div class="controls"><label class="field">Eje X<select id="irisX"><option value="0" selected>Eliminaciones</option><option value="1">Asistencias</option><option value="2">Objetivos capturados</option><option value="3">Daño (centenas)</option></select></label><label class="field">Eje Y<select id="irisY"><option value="0">Eliminaciones</option><option value="1" selected>Asistencias</option><option value="2">Objetivos capturados</option><option value="3">Daño (centenas)</option></select></label></div><div class="actions"><button id="loadIris" class="primary">Cargar 150 jugadores en el laboratorio</button><button id="restoreSynthetic">Volver a puntos de ejemplo</button></div></article><article class="card"><h2>Importación de CSV</h2><p class="sub">CSV local con encabezados, al menos dos columnas numéricas y una columna de clase. Compatible con separadores coma, punto y coma o tabulador y comillas CSV. No se envía ningún archivo a Internet.</p><input class="file" id="csv" type="file" accept=".csv,text/csv"><div id="csvFields" class="controls hidden"><label class="field">Columna X<select id="csvX"></select></label><label class="field">Columna Y<select id="csvY"></select></label><label class="field">Etiqueta / clase<select id="csvLabel"></select></label></div><button id="loadCSV" class="primary" disabled>📈 Analizar CSV</button><p class="message" id="csvMessage" aria-live="polite"></p><p class="sub">Se admiten hasta 3.000 filas válidas y 8 clases. Para representar y evaluar usamos únicamente los dos atributos elegidos; las variables se escalan con mínimos y máximos del entrenamiento.</p></article></div><div class="stack"><article class="card"><h2>Un ejemplo de CSV</h2><pre>altura,peso,tipo
+170,68,A
+183,81,B
+165,60,A
+190,89,B
+175,73,A</pre><p class="sub">Cuantas más filas variadas y representativas, más útil será analizar el resultado.</p><button id="sampleCSV">Descargar CSV de ejemplo</button></article><article class="card"><h2>¿Por qué normalizar?</h2><p>Si comparas ingresos anuales y edad, los ingresos dominarían la distancia por tener números mucho mayores. KNN es especialmente sensible a esto.</p><p class="info">En la evaluación, los mínimos y máximos se aprenden del entrenamiento y después se aplican al test para evitar filtración de información.</p></article></div></div></section>
+<section id="about" class="tab hidden"><div class="card"><h2>Aplicaciones reales de KNN</h2><div class="grid3"><div class="lesson"><h3>🎬 Recomendaciones</h3><p>Encontrar usuarios parecidos en preferencias y sugerir contenido. En sistemas reales se suelen emplear técnicas adicionales.</p></div><div class="lesson"><h3>🎮 Analítica de jugadores</h3><p>Identificar perfiles de juego a partir de estadísticas de partidas y ejemplos previamente etiquetados.</p></div><div class="lesson"><h3>🔎 Detección de anomalías</h3><p>Las distancias a vecinos pueden ayudar a identificar registros muy distintos del resto.</p></div></div><h2 style="margin-top:20px">Ventajas y limitaciones</h2><div class="grid3"><div class="lesson"><h3 class="glow">✓ Ventajas</h3><p>Intuitivo, fácil de implementar y flexible ante fronteras no lineales.</p></div><div class="lesson"><h3>⚠ Limitaciones</h3><p>Puede ser lento con muchos datos y sensible al ruido, la escala y la dimensionalidad.</p></div><div class="lesson"><h3>✅ Buenas prácticas</h3><p>Normalizar, reservar un test independiente, elegir K con validación y evitar entrenar con información del test.</p></div></div></div></section>
+<footer class="footer">KNN LAB ULTIMATE · Funciona 100 % sin conexión · HTML + CSS + JavaScript · <kbd>Esc</kbd> sale de presentación</footer></div>
+<script>
+'use strict';
+const $=id=>document.getElementById(id), clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const colors=['#4fa8ff','#ff709c','#9fe1a3','#f7bc75','#b39aff','#65ded0','#f5a7ee','#d0e27a'];
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+let points=[], query={x:.53,y:.48}, k=5,metric='euclidean',currentType='synthetic',sourceRows=null,step=0,playing=false,renderRequest=0,train=[],test=[],classes=[],bounds=null,evalResult=null;
+let challenge={points:[],query:{x:.5,y:.5},answered:false,hits:0,attempts:0,streak:0};
+let irisRaw=[];
+const seeded=(seed)=>()=>{seed=(Math.imul(1664525,seed)+1013904223)>>>0;return seed/4294967296};
+const rnd=seeded(47381);
+function gaussian(rand){return Math.sqrt(-2*Math.log(Math.max(rand(),1e-9)))*Math.cos(2*Math.PI*rand())}
+function generate(seed=14){let rand=seeded(seed);const p=[];for(let i=0;i<80;i++){let cls=i%2;let x=(cls?.69:.30)+gaussian(rand)*.135,y=(cls?.65:.35)+gaussian(rand)*.16;p.push({x:clamp(x,.035,.965),y:clamp(y,.035,.965),label:cls?'Rosa':'Azul'})}return p}
+function dist(a,b,m=metric){let dx=a.x-b.x,dy=a.y-b.y;return m==='manhattan'?Math.abs(dx)+Math.abs(dy):Math.hypot(dx,dy)}
+function predict(from,p,K=k,m=metric){if(!from.length)return {label:null,votes:{},neighbors:[]};let neighbors=from.map((q,i)=>({...q,d:dist(q,p,m),i})).sort((a,b)=>a.d-b.d||a.i-b.i).slice(0,Math.min(K,from.length));let votes={};for(let x of neighbors)votes[x.label]=(votes[x.label]||0)+1;let ordered=Object.keys(votes).sort((a,b)=>votes[b]-votes[a]||neighbors.find(n=>n.label===a).d-neighbors.find(n=>n.label===b).d||a.localeCompare(b));return {label:ordered[0],votes,neighbors}}
+function split(rows){let rand=seeded(71091),groups={};for(let p of rows)(groups[p.label]??=[]).push(p);let tr=[],te=[];for(let group of Object.values(groups)){for(let i=group.length-1;i>0;i--){let j=Math.floor(rand()*(i+1));[group[i],group[j]]=[group[j],group[i]]}let n=group.length===1?1:Math.max(1,Math.floor(group.length*.7));tr.push(...group.slice(0,n));te.push(...group.slice(n))}return [tr,te]}
+function scaleRows(rows){const [tr,te]=split(rows.map(p=>({...p})));let loX=Math.min(...tr.map(p=>p.x)),hiX=Math.max(...tr.map(p=>p.x)),loY=Math.min(...tr.map(p=>p.y)),hiY=Math.max(...tr.map(p=>p.y));let convert=p=>({...p,x:(p.x-loX)/(hiX-loX||1),y:(p.y-loY)/(hiY-loY||1)});return [tr.map(convert),te.map(convert)]}
+function recalc(){classes=[...new Set(points.map(p=>p.label))].sort();[train,test]=scaleRows(points);const start=performance.now();let matrix=Object.fromEntries(classes.map(c=>[c,Object.fromEntries(classes.map(d=>[d,0]))]));let correct=0;for(let p of test){let pred=predict(train,p);if(pred.label===p.label)correct++;if(matrix[p.label]&&pred.label!=null)matrix[p.label][pred.label]++}evalResult={accuracy:test.length?correct/test.length:null,correct,total:test.length,matrix,elapsed:performance.now()-start};updateStats();renderAll()}
+function baseColor(label){let i=classes.indexOf(label);return colors[(i<0?0:i)%colors.length]}
+function updateStats(){const e=evalResult;$('accuracy').textContent=e?.accuracy==null?'—':(100*e.accuracy).toFixed(1)+'%';$('testCount').textContent=e?.total??'—';$('elapsed').textContent=e?.elapsed==null?'—':e.elapsed.toFixed(1)+' ms';$('evalNote').textContent=e?.total?`${e.correct} predicciones correctas de ${e.total} registros de prueba. Una sola división orientativa; la métrica puede variar según la partición.`:'No hay muestras suficientes para evaluar. Añade registros con clases conocidas.';let html='<table><thead><tr><th>Real ↓ / Pred. →</th>'+classes.map(c=>'<th>'+esc(c)+'</th>').join('')+'</tr></thead><tbody>';for(let c of classes)html+='<tr><th>'+esc(c)+'</th>'+classes.map(d=>`<td style="color:${c===d?'#a4f5d5':'#f9a6ad'}">${e.matrix[c][d]||0}</td>`).join('')+'</tr>'; $('confusion').innerHTML=html+'</tbody></table>'; renderExtendedMetrics(e);renderKChart();}
+function renderExtendedMetrics(e){let matrix=e.matrix;const fmt=v=>Number.isFinite(v)?(v*100).toFixed(1)+'%':'—';let html='<table><thead><tr><th>Categoría / Clase</th><th>Precisión</th><th>Recall</th><th>F1</th><th>Soporte</th></tr></thead><tbody>';for(const c of classes){let tp=matrix[c][c]||0;let row=classes.reduce((n,d)=>n+(matrix[c][d]||0),0);let col=classes.reduce((n,d)=>n+(matrix[d][c]||0),0);let precision=col?tp/col:0,recall=row?tp/row:0,f1=precision+recall?2*precision*recall/(precision+recall):0;html+=`<tr><td style="color:${baseColor(c)}">${esc(c)}</td><td class="miniStat">${fmt(precision)}</td><td class="miniStat">${fmt(recall)}</td><td class="miniStat">${fmt(f1)}</td><td>${row}</td></tr>`}html+='</tbody></table>';$('classMetrics').innerHTML=html;}
+function renderKChart(){const el=$('kChart');if(!el)return;let z=canvasSetup(el);if(!z)return;let {ctx,w,h}=z;ctx.clearRect(0,0,w,h);const pad={l:42,r:13,t:15,b:31},width=w-pad.l-pad.r,height=h-pad.t-pad.b;const count=Math.min(15,train.length);if(!count||!test.length)return;let scores=[];for(let K=1;K<=count;K++){let ok=0;for(const row of test)if(predict(train,row,K,metric).label===row.label)ok++;scores.push(ok/test.length)}const x=i=>pad.l+(count===1?width/2:i/(count-1)*width),y=v=>pad.t+height*(1-v);ctx.font='11px system-ui';ctx.textAlign='right';for(let i=0;i<=4;i++){let t=i/4;ctx.strokeStyle='#2b2b2b';ctx.beginPath();ctx.moveTo(pad.l,y(t));ctx.lineTo(w-pad.r,y(t));ctx.stroke();ctx.fillStyle='#bca38c';ctx.fillText(Math.round(t*100)+'%',pad.l-7,y(t)+4)}ctx.strokeStyle='#ff8b1f';ctx.lineWidth=2.5;ctx.beginPath();scores.forEach((v,i)=>i?ctx.lineTo(x(i),y(v)):ctx.moveTo(x(i),y(v)));ctx.stroke();scores.forEach((v,i)=>{ctx.beginPath();ctx.arc(x(i),y(v),i+1===k?5:3,0,Math.PI*2);ctx.fillStyle=i+1===k?'#ffb04c':'#ff8b1f';ctx.fill()});ctx.strokeStyle='#ffcd71aa';ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(x(k-1),pad.t);ctx.lineTo(x(k-1),h-pad.b);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='#bca38c';ctx.textAlign='center';for(let i=0;i<count;i++){if(i===0||i===count-1||(i+1)%2===1)ctx.fillText(String(i+1),x(i),h-10)}ctx.textAlign='left';ctx.fillStyle='#ffb04c';ctx.fillText('K='+k,Math.min(w-42,x(k-1)+8),pad.t+12)}
+function classifyRealFlower(){let kills=Number($('realLength').value),assists=Number($('realWidth').value);if(!Number.isFinite(kills)||!Number.isFinite(assists)||kills<0||assists<0||kills>40||assists>40){$('realResult').textContent='Introduce valores válidos entre 0 y 40.';return;}const all=irisRaw.map(r=>({x:r[0],y:r[1],label:['Atacante','Estratega','Apoyo'][r[4]]}));let xMin=Math.min(...all.map(p=>p.x)),xMax=Math.max(...all.map(p=>p.x)),yMin=Math.min(...all.map(p=>p.y)),yMax=Math.max(...all.map(p=>p.y));let norm=p=>({x:(p.x-xMin)/(xMax-xMin||1),y:(p.y-yMin)/(yMax-yMin||1),label:p.label});let target=norm({x:kills,y:assists}),candidates=all.map(norm),r=predict(candidates,target,k,metric),winner=r.votes[r.label]||0;$('realResult').innerHTML=`<div class="eyebrow">PERFIL PREDICHO</div><div style="font-size:27px;font-weight:800;color:var(--accent-2)">${esc(r.label||'Sin datos')}</div><div>Votación: <b>${winner} de ${r.neighbors.length} vecinos</b> · Distancia ${metric==='euclidean'?'euclídea':'Manhattan'} · K=${k}</div><div class="sub" style="margin-top:10px">Comparado con ${candidates.length} perfiles simulados. El jugador consultado no se añade al conjunto de referencia.</div>`;}
+$('classifyReal').onclick=classifyRealFlower;for(const [id,a,b] of [['exampleSetosa',26,5],['exampleVersicolor',14,12],['exampleVirginica',6,23]]){$(id).onclick=()=>{$('realLength').value=a;$('realWidth').value=b;classifyRealFlower()}};
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function canvasSetup(el){const dpr=Math.min(devicePixelRatio||1,2),w=el.clientWidth,h=el.clientHeight;if(w<2||h<2)return null;let ww=Math.round(w*dpr),hh=Math.round(h*dpr);if(el.width!==ww||el.height!==hh){el.width=ww;el.height=hh}let ctx=el.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);return {ctx,w,h}}
+function draw(canvas,pts,q,opts={}){let z=canvasSetup(canvas);if(!z)return;let {ctx,w,h}=z;ctx.clearRect(0,0,w,h);ctx.fillStyle='#090909';ctx.fillRect(0,0,w,h);let pad=23,scaleX=x=>pad+x*(w-2*pad),scaleY=y=>h-pad-y*(h-2*pad);let trainPts=opts.trainPts||pts;const K=opts.K||k,met=opts.metric||metric;let showRegions=opts.regions??false; if(showRegions&&trainPts.length){let cell=8;for(let y=pad;y<h-pad;y+=cell)for(let x=pad;x<w-pad;x+=cell){let qp={x:(x-pad)/(w-2*pad),y:1-(y-pad)/(h-2*pad)};let p=predict(trainPts,qp,K,met),c=colors[Math.max(0,classes.indexOf(p.label))%colors.length];ctx.fillStyle=c+'19';ctx.fillRect(x,y,cell+1,cell+1)}}ctx.lineWidth=1;ctx.strokeStyle='#272727';ctx.globalAlpha=.5;for(let i=0;i<=10;i++){let xx=pad+i*(w-2*pad)/10,yy=pad+i*(h-2*pad)/10;ctx.beginPath();ctx.moveTo(xx,pad);ctx.lineTo(xx,h-pad);ctx.moveTo(pad,yy);ctx.lineTo(w-pad,yy);ctx.stroke()}ctx.globalAlpha=1;let result=predict(trainPts,q,K,met),neighbors=result.neighbors;let stage=opts.stage??5;if(stage>=2){for(let i=0;i<Math.min(stage===2?pts.length:neighbors.length,stage===2?pts.length:K);i++){let p=stage===2?pts[i]:neighbors[i];ctx.beginPath();ctx.moveTo(scaleX(q.x),scaleY(q.y));ctx.lineTo(scaleX(p.x),scaleY(p.y));ctx.strokeStyle=stage===2?'#b9d7ff29':'#ffd17c9a';ctx.lineWidth=stage===2?1:1.6;ctx.stroke()}}for(let p of pts){ctx.beginPath();ctx.arc(scaleX(p.x),scaleY(p.y),Math.max(3.1,pts.length>700?3.1:4.7),0,Math.PI*2);ctx.fillStyle=baseColor(p.label);ctx.fill();ctx.strokeStyle='#f0f9ff77';ctx.lineWidth=.8;ctx.stroke()}if(stage>=3){for(let p of neighbors){ctx.beginPath();ctx.arc(scaleX(p.x),scaleY(p.y),9,0,Math.PI*2);ctx.strokeStyle='#ffb04c';ctx.lineWidth=1.5;ctx.stroke()}}ctx.beginPath();ctx.arc(scaleX(q.x),scaleY(q.y),12,0,Math.PI*2);ctx.fillStyle='#ffd17c2d';ctx.fill();ctx.beginPath();ctx.arc(scaleX(q.x),scaleY(q.y),6,0,Math.PI*2);ctx.fillStyle='#ffb04c';ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke();ctx.fillStyle='#c1a991';ctx.font='11px system-ui';ctx.fillText('0',pad-12,h-pad+14);ctx.fillText('1',w-pad-5,h-pad+14);ctx.fillText('1',pad-17,pad+3)}
+const stepDescriptions=['Selecciona un punto desconocido. El objetivo es descubrir su clase.','Calculamos la distancia entre el nuevo punto y cada ejemplo conocido.','Ordenamos todos los candidatos por distancia, de menor a mayor.','Escogemos exclusivamente los K vecinos más cercanos.','Contamos cuántos votos recibe cada clase.','La clase más votada se convierte en nuestra predicción.'];
+function renderSteps(){let active=step===0?0:step;$('stepCount').textContent=step===0?'En directo':`Paso ${step} de 5`;$('stepProgress').style.width=(step/5*100)+'%';$('steps').innerHTML=stepDescriptions.map((s,i)=>`<div class="step ${i===active?'on':i<active?'done':''}"><b>${i===0?'Inicio':i+'.'} </b>${s}</div>`).join('');let r=predict(points,query),major=r.votes[r.label]||0;let detail=step===2?` Se han calculado ${points.length} distancias.`:step===3?` Vecinos elegidos: ${r.neighbors.length}.`:step>=4?` Votos ganadores: ${major}/${r.neighbors.length}.`:'';$('explanation').textContent=stepDescriptions[step]+detail;$('prevStep').disabled=step===0;$('nextStep').disabled=step===5}
+function renderAll(){let result=predict(points,query),n=result.neighbors.length;let cnt=result.votes[result.label]||0;$('prediction').textContent=result.label||'—';$('prediction').style.color=result.label?baseColor(result.label):'#fff';$('votes').textContent=n?`${cnt}/${n}`:'—';$('confidence').textContent=n?(100*cnt/n).toFixed(0)+'%':'—';$('voteBars').innerHTML=classes.map(c=>`<div class="barrow"><span title="${esc(c)}">${esc(c.slice(0,13))}</span><div class="track"><div class="fill" style="width:${n?(result.votes[c]||0)/n*100:0}%;background:${baseColor(c)}"></div></div><b>${result.votes[c]||0}</b></div>`).join('');$('neighbors').innerHTML=result.neighbors.map((p,i)=>`<tr><td>${i+1}</td><td style="color:${baseColor(p.label)}">${esc(p.label)}</td><td>${p.d.toFixed(3)}</td><td>${p.x.toFixed(2)}, ${p.y.toFixed(2)}</td></tr>`).join('');$('kLabel').textContent=k;renderSteps();draw($('plot'),points,query,{regions:$('regions').value==='on'&&step===0&&points.length<=600,stage:step===0?5:step,trainPts:points})}
+function setData(rows,name){points=rows;currentType=name;query={x:.52,y:.50};step=0;let max=Math.min(15,points.length);$('k').max=Math.max(1,max);k=Math.min(5,max||1);$('k').value=k;$('datasetPill').textContent=name==='synthetic'?'Datos sintéticos':name==='iris'?'eSports · 150 perfiles':'CSV personalizado';recalc();switchTab('lab')}
+function switchTab(t){document.querySelectorAll('.tab').forEach(el=>el.classList.toggle('hidden',el.id!==t));document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===t));setTimeout(()=>{if(t==='lab')renderAll();if(t==='challenge')drawChallenge()},30)}
+document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>switchTab(b.dataset.go));
+$('k').oninput=e=>{k=Number(e.target.value);step=0;recalc()};$('distance').onchange=e=>{metric=e.target.value;step=0;recalc()};$('regions').onchange=renderAll;
+$('random').onclick=()=>setData(generate(Math.floor(Math.random()*1000000)),'synthetic');$('reset').onclick=()=>setData(generate(14),'synthetic');$('clear').onclick=()=>setData([],'synthetic');
+$('plot').addEventListener('pointerdown',e=>{let r=$('plot').getBoundingClientRect(),pad=23,x=clamp((e.clientX-r.left-pad)/(r.width-2*pad),0,1),y=clamp(1-(e.clientY-r.top-pad)/(r.height-2*pad),0,1),mode=$('mode').value;if(mode==='query'){query={x,y};step=0;renderAll()}else if(mode==='erase'){if(!points.length)return;let near=points.reduce((a,p,i)=>dist(p,{x,y})<a.d?{d:dist(p,{x,y}),i}:a,{d:Infinity,i:-1});if(near.d<.065)points.splice(near.i,1);step=0;recalc()}else {points.push({x,y,label:mode==='blue'?'Azul':'Rosa'});step=0;recalc()}});
+$('prevStep').onclick=()=>{step=Math.max(0,step-1);renderAll()};$('nextStep').onclick=()=>{step=Math.min(5,step+1);renderAll()};async function animate(){if(playing)return;playing=true;$('playSteps').disabled=true;$('animate').disabled=true;step=0;renderAll();for(let i=1;i<=5&&playing;i++){await sleep(i===1?480:950);if(!playing)break;step=i;renderAll()}playing=false;$('playSteps').disabled=false;$('animate').disabled=false}$('playSteps').onclick=animate;$('animate').onclick=animate;
+$('presentBtn').onclick=()=>{document.body.classList.toggle('present');$('presentBtn').textContent=document.body.classList.contains('present')?'Salir presentación':'Modo presentación';setTimeout(renderAll,100)};document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.body.classList.contains('present'))$('presentBtn').click();if(document.body.classList.contains('present')&&e.key==='ArrowRight')$('nextStep').click();if(document.body.classList.contains('present')&&e.key==='ArrowLeft')$('prevStep').click()});
+function newChallenge(){challenge.points=generate(Math.floor(Math.random()*1000000));challenge.query={x:.12+Math.random()*.76,y:.12+Math.random()*.76};challenge.answered=false;$('challengeMessage').textContent='¿Qué clase elegirán los cinco vecinos?';$('guessBlue').disabled=false;$('guessPink').disabled=false;drawChallenge()}function drawChallenge(){let prev=classes;classes=['Azul','Rosa'];draw($('challengePlot'),challenge.points,challenge.query,{K:5,metric:'euclidean',regions:false,stage:challenge.answered?5:1});classes=prev}function guess(value){if(challenge.answered)return;challenge.answered=true;let answer=predict(challenge.points,challenge.query,5,'euclidean').label;let ok=answer===value;challenge.attempts++;if(ok){challenge.hits++;challenge.streak++}else challenge.streak=0;$('challengeHits').textContent=challenge.hits;$('challengeAttempts').textContent=challenge.attempts;$('challengeStreak').textContent=challenge.streak;$('challengeMessage').textContent=(ok?'✅ ¡Correcto! ':'❌ Casi. ')+`KNN predice ${answer}. Observa los cinco vecinos resaltados.`;$('guessBlue').disabled=true;$('guessPink').disabled=true;drawChallenge()};$('guessBlue').onclick=()=>guess('Azul');$('guessPink').onclick=()=>guess('Rosa');$('newChallenge').onclick=newChallenge;
+// Educational simulated gaming data: 150 synthetic player profiles, not real esports records.
+const IRIS_CSV=`23,3,0,27,0
+17,5,0,25,0
+20,6,0,47,0
+30,7,4,35,0
+22,4,12,35,0
+27,7,5,34,0
+23,3,4,38,0
+28,1,4,35,0
+29,4,6,37,0
+23,8,3,39,0
+25,8,5,34,0
+23,7,0,34,0
+32,5,3,29,0
+24,4,0,39,0
+24,9,2,28,0
+18,0,7,30,0
+22,2,0,35,0
+31,1,10,33,0
+25,8,3,34,0
+25,8,4,20,0
+23,5,6,32,0
+22,6,0,36,0
+23,12,0,30,0
+29,6,3,34,0
+23,5,0,40,0
+26,8,6,32,0
+30,1,1,40,0
+27,5,7,27,0
+25,9,2,32,0
+29,7,5,30,0
+32,3,5,24,0
+26,5,0,39,0
+33,11,2,30,0
+20,5,0,33,0
+29,10,3,25,0
+25,2,0,27,0
+23,9,5,30,0
+17,1,5,32,0
+34,13,6,26,0
+18,1,0,38,0
+25,6,5,32,0
+25,6,1,29,0
+26,3,3,21,0
+36,5,0,21,0
+29,4,5,28,0
+27,0,0,30,0
+22,4,6,32,0
+30,8,4,34,0
+23,6,6,37,0
+28,9,7,31,0
+16,16,14,18,1
+19,11,13,23,1
+12,9,15,15,1
+13,16,20,26,1
+15,12,16,24,1
+16,9,14,9,1
+21,9,11,14,1
+19,8,18,8,1
+14,16,11,17,1
+9,13,15,21,1
+12,12,14,8,1
+14,15,20,23,1
+9,14,12,12,1
+20,15,12,20,1
+14,11,18,12,1
+13,19,9,20,1
+17,18,13,24,1
+6,16,11,14,1
+18,11,16,27,1
+16,13,15,28,1
+13,16,9,12,1
+23,14,9,22,1
+13,10,11,19,1
+16,14,14,10,1
+11,13,10,21,1
+15,16,16,13,1
+17,12,12,21,1
+12,11,13,12,1
+19,9,10,10,1
+17,12,11,16,1
+13,11,19,17,1
+14,9,11,15,1
+8,12,17,14,1
+13,13,15,23,1
+12,14,11,19,1
+9,10,9,17,1
+10,17,16,15,1
+13,8,10,16,1
+17,14,16,25,1
+13,10,11,22,1
+19,16,10,9,1
+10,12,13,12,1
+18,19,12,12,1
+8,14,21,20,1
+12,14,17,15,1
+8,11,13,11,1
+13,15,18,15,1
+15,9,15,19,1
+12,15,22,13,1
+17,18,29,17,1
+0,24,9,8,2
+7,26,18,7,2
+10,23,26,7,2
+8,26,20,8,2
+4,22,26,14,2
+7,25,16,9,2
+2,25,16,4,2
+8,22,23,12,2
+6,27,18,16,2
+12,23,21,12,2
+8,20,21,10,2
+5,26,21,12,2
+1,19,19,19,2
+9,18,9,15,2
+7,22,17,8,2
+13,28,24,6,2
+7,25,22,11,2
+13,23,20,14,2
+6,27,20,6,2
+9,22,19,10,2
+11,28,21,7,2
+10,24,20,14,2
+11,26,19,3,2
+5,19,22,13,2
+0,23,19,14,2
+7,23,18,14,2
+2,24,13,7,2
+8,24,25,14,2
+12,23,20,12,2
+3,24,27,7,2
+9,22,21,10,2
+4,19,25,4,2
+4,23,17,18,2
+0,23,21,24,2
+1,26,23,6,2
+8,23,25,10,2
+13,19,24,17,2
+4,22,17,15,2
+6,25,20,15,2
+11,25,24,9,2
+0,18,25,7,2
+9,21,22,9,2
+8,20,22,2,2
+10,22,23,10,2
+0,24,18,12,2
+7,16,20,11,2
+8,24,18,17,2
+1,21,26,16,2
+6,23,18,9,2
+4,23,25,6,2`;
+irisRaw=IRIS_CSV.trim().split('\n').map(line=>line.split(',').map(Number));
+function irisPoints(){let a=Number($('irisX').value),b=Number($('irisY').value);let raw=irisRaw.map(r=>({x:r[a],y:r[b],label:['Atacante','Estratega','Apoyo'][r[4]]}));let xs=raw.map(p=>p.x),ys=raw.map(p=>p.y),loX=Math.min(...xs),hiX=Math.max(...xs),loY=Math.min(...ys),hiY=Math.max(...ys);return raw.map(p=>({x:(p.x-loX)/(hiX-loX||1),y:(p.y-loY)/(hiY-loY||1),label:p.label}))}
+$('loadIris').onclick=()=>setData(irisPoints(),'iris');$('restoreSynthetic').onclick=()=>setData(generate(14),'synthetic');$('irisX').onchange=$('irisY').onchange=()=>{if(currentType==='iris')setData(irisPoints(),'iris')};
+let csvData=null;
+function parseCSV(text){text=text.replace(/^\uFEFF/,'');let sample=text.split(/\r?\n/).find(s=>s.trim())||'';let delims=[',',';','\t'],count=d=>{let quoted=false,n=0;for(let ch of sample){if(ch==='"')quoted=!quoted;else if(ch===d&&!quoted)n++}return n},delim=delims.sort((a,b)=>count(b)-count(a))[0];let result=[],row=[],field='',quoted=false;for(let i=0;i<text.length;i++){let c=text[i];if(c==='"'){if(quoted&&text[i+1]==='"'){field+='"';i++}else quoted=!quoted}else if(c===delim&&!quoted){row.push(field.trim());field=''}else if((c==='\n'||c==='\r')&&!quoted){if(c==='\r'&&text[i+1]==='\n')i++;row.push(field.trim());if(row.some(Boolean))result.push(row);row=[];field=''}else field+=c}if(quoted)throw Error('Hay comillas sin cerrar');row.push(field.trim());if(row.some(Boolean))result.push(row);return result}
+$('csv').onchange=async e=>{let file=e.target.files?.[0];if(!file)return;try{if(file.size>3e6)throw Error('Máximo 3 MB por archivo');csvData=parseCSV(await file.text());if(csvData.length<4||csvData[0].length<3)throw Error('Se necesitan encabezados y al menos 3 filas y 3 columnas');let heads=csvData[0].map((h,i)=>h||'Columna '+(i+1));for(let id of ['csvX','csvY','csvLabel'])$(id).innerHTML=heads.map((h,i)=>`<option value="${i}">${esc(h)}</option>`).join('');$('csvX').value='0';$('csvY').value='1';$('csvLabel').value=String(heads.length-1);$('csvFields').classList.remove('hidden');$('loadCSV').disabled=false;$('csvMessage').textContent=`Leídas ${csvData.length-1} filas; selecciona columnas.`}catch(err){$('csvMessage').textContent='Error: '+err.message;$('loadCSV').disabled=true}};
+function num(s){let t=String(s).trim();if(!t)return NaN;return Number(t.replace(',','.'))}
+$('loadCSV').onclick=()=>{try{let a=Number($('csvX').value),b=Number($('csvY').value),c=Number($('csvLabel').value);if(new Set([a,b,c]).size!==3)throw Error('Selecciona tres columnas diferentes');let rows=csvData.slice(1).filter(r=>r.length>Math.max(a,b,c)&&Number.isFinite(num(r[a]))&&Number.isFinite(num(r[b]))&&r[c].trim()).slice(0,3000).map(r=>({x:num(r[a]),y:num(r[b]),label:r[c].trim()}));if(rows.length<8)throw Error('Necesitas al menos ocho filas numéricas válidas');if(new Set(rows.map(p=>p.label)).size>8)throw Error('Se admiten como máximo ocho clases');let xs=rows.map(p=>p.x),ys=rows.map(p=>p.y),lx=Math.min(...xs),hx=Math.max(...xs),ly=Math.min(...ys),hy=Math.max(...ys);setData(rows.map(p=>({x:(p.x-lx)/(hx-lx||1),y:(p.y-ly)/(hy-ly||1),label:p.label})),'csv');$('csvMessage').textContent='CSV importado correctamente'}catch(err){$('csvMessage').textContent='Error: '+err.message}};
+$('sampleCSV').onclick=()=>{let content='altura,peso,tipo\n170,68,A\n183,81,B\n165,60,A\n190,89,B\n175,73,A\n172,65,A\n188,90,B\n181,85,B\n169,64,A\n186,84,B\n160,55,A\n194,96,B';let a=document.createElement('a'),blob=new Blob([content],{type:'text/csv;charset=utf-8'});a.href=URL.createObjectURL(blob);a.download='ejemplo_knn.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
+window.addEventListener('resize',()=>{renderAll();if(!$('challenge').classList.contains('hidden'))drawChallenge()});setData(generate(14),'synthetic');newChallenge();
+</script></body></html>

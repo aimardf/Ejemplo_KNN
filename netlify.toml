@@ -1,0 +1,7 @@
+[build]
+  publish = "."
+
+[[redirects]]
+  from = "/knn_lab_ultimate_esports.html"
+  to = "/"
+  status = 301
